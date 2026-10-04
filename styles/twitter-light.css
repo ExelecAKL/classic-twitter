@@ -1,0 +1,390 @@
+/* Classic Twitter Light ---------------------------------------------------
+   The site uses generated atomic classes, so durable roles/test IDs handle
+   structure while a few long-lived color-token classes bridge dark mode. */
+
+html[data-twitter-classic="on"] {
+  color-scheme: light !important;
+  background: #ffffff !important;
+  --twitter-blue: #1d9bf0;
+  --twitter-blue-hover: #1a8cd8;
+  --twitter-ink: #0f1419;
+  --twitter-secondary: #536471;
+  --twitter-border: #eff3f4;
+  --twitter-soft: #f7f9f9;
+  --twitter-soft-hover: #eff1f1;
+  --twitter-overlay: rgba(0, 0, 0, 0.4);
+}
+
+html[data-twitter-classic="on"],
+html[data-twitter-classic="on"] body,
+html[data-twitter-classic="on"] #react-root,
+html[data-twitter-classic="on"] #react-root > div {
+  background-color: #ffffff !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] body {
+  font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  accent-color: var(--twitter-blue);
+}
+
+html[data-twitter-classic="on"] ::selection {
+  background: rgba(29, 155, 240, 0.25);
+}
+
+/* Core application surfaces */
+
+html[data-twitter-classic="on"] header[role="banner"],
+html[data-twitter-classic="on"] main[role="main"],
+html[data-twitter-classic="on"] [data-testid="primaryColumn"],
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"],
+html[data-twitter-classic="on"] [data-testid="cellInnerDiv"],
+html[data-twitter-classic="on"] article[data-testid="tweet"],
+html[data-twitter-classic="on"] [data-testid="DMDrawer"],
+html[data-twitter-classic="on"] [data-testid="sheetDialog"] {
+  background-color: #ffffff !important;
+  color: var(--twitter-ink) !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="primaryColumn"] {
+  border-inline-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="primaryColumn"] > div:first-child,
+html[data-twitter-classic="on"] [data-testid="primaryColumn"] > div > div:first-child {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] article[data-testid="tweet"],
+html[data-twitter-classic="on"] [data-testid="cellInnerDiv"] {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] article[data-testid="tweet"]:hover,
+html[data-twitter-classic="on"] [data-testid="cellInnerDiv"]:has(article[data-testid="tweet"]):hover {
+  background-color: var(--twitter-soft) !important;
+}
+
+/* X/Twitter's long-lived React Native Web dark color tokens. */
+
+html[data-twitter-classic="on"] .r-kemksi:not(
+  [data-testid="videoPlayer"],
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"],
+  [data-testid="swipe-to-dismiss"] *
+) {
+  background-color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(.r-yfoy6g, .r-5zmot):not(
+  [data-testid="videoPlayer"],
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"],
+  [data-testid="swipe-to-dismiss"] *
+) {
+  background-color: var(--twitter-soft) !important;
+}
+
+html[data-twitter-classic="on"] .r-1nao33i:not(
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"] *
+) {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] .r-1tl8opc,
+html[data-twitter-classic="on"] .r-14j79pv {
+  color: var(--twitter-secondary) !important;
+}
+
+html[data-twitter-classic="on"] .r-18bvks7 {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] .r-1cvl2hr {
+  color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  header[role="banner"],
+  [data-testid="primaryColumn"],
+  [data-testid="sidebarColumn"],
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="sheetDialog"]
+) [style*="background-color: rgb(0, 0, 0)"]:not(
+  [data-testid="videoPlayer"],
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"],
+  [data-testid="swipe-to-dismiss"] *
+) {
+  background-color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  header[role="banner"],
+  main[role="main"],
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="sheetDialog"]
+) [style*="color: rgb(231, 233, 234)"]:not(
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"] *
+) {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  header[role="banner"],
+  main[role="main"],
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="sheetDialog"]
+) [style*="border-color: rgb(47, 51, 54)"] {
+  border-color: var(--twitter-border) !important;
+}
+
+/* Masthead bird */
+
+html[data-twitter-classic="on"] a[data-twitter-classic-logo="on"] {
+  color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] a[data-twitter-classic-logo="on"] > * {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"] a[data-twitter-classic-logo="on"]::before {
+  content: "" !important;
+  display: block !important;
+  width: 30px !important;
+  height: 30px !important;
+  background: center / contain no-repeat url("../assets/twitter-bird.svg") !important;
+}
+
+html[data-twitter-classic="on"] a[data-twitter-classic-logo="on"]:hover::before {
+  transform: scale(1.03);
+}
+
+/* Navigation and tabs */
+
+html[data-twitter-classic="on"] header[role="banner"] nav a,
+html[data-twitter-classic="on"] header[role="banner"] nav a :is(span, svg),
+html[data-twitter-classic="on"] [role="tab"] {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] nav a:hover > div,
+html[data-twitter-classic="on"] [role="tab"]:hover,
+html[data-twitter-classic="on"] [role="menuitem"]:hover {
+  background-color: rgba(15, 20, 25, 0.1) !important;
+}
+
+html[data-twitter-classic="on"] [role="tab"][aria-selected="true"] {
+  font-weight: 700 !important;
+}
+
+html[data-twitter-classic="on"] [role="tab"][aria-selected="true"] div[style*="background-color"],
+html[data-twitter-classic="on"] [role="tab"][aria-selected="true"] span[style*="background-color"] {
+  background-color: var(--twitter-blue) !important;
+}
+
+/* Tweet buttons and interactive states */
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+) {
+  background-color: var(--twitter-blue) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+) * {
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+):not([aria-disabled="true"]):hover {
+  background-color: var(--twitter-blue-hover) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+)[aria-disabled="true"] {
+  opacity: 0.5 !important;
+}
+
+html[data-twitter-classic="on"] a,
+html[data-twitter-classic="on"] button,
+html[data-twitter-classic="on"] [role="button"],
+html[data-twitter-classic="on"] [role="tab"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-twitter-classic="on"] :is(a, button, input, textarea, [role="button"], [role="tab"]):focus-visible {
+  outline: 2px solid var(--twitter-blue) !important;
+  outline-offset: 2px !important;
+}
+
+/* Composer, search, and form fields */
+
+html[data-twitter-classic="on"] :is(input, textarea, [contenteditable="true"]),
+html[data-twitter-classic="on"] [data-testid="tweetTextarea_0"] {
+  color: var(--twitter-ink) !important;
+  caret-color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] :is(input, textarea)::placeholder {
+  color: var(--twitter-secondary) !important;
+  opacity: 1 !important;
+}
+
+html[data-twitter-classic="on"] form[role="search"],
+html[data-twitter-classic="on"] form[role="search"] > div,
+html[data-twitter-classic="on"] form[role="search"] div:has(> [data-testid="SearchBox_Search_Input"]),
+html[data-twitter-classic="on"] [data-testid="SearchBox_Search_Input"] {
+  background-color: var(--twitter-border) !important;
+  border-color: transparent !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] form[role="search"]:focus-within,
+html[data-twitter-classic="on"] form[role="search"]:focus-within > div,
+html[data-twitter-classic="on"] form[role="search"]:focus-within div:has(> [data-testid="SearchBox_Search_Input"]),
+html[data-twitter-classic="on"] form[role="search"]:focus-within [data-testid="SearchBox_Search_Input"] {
+  background-color: #ffffff !important;
+  border-color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toolBar"] {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toolBar"] :is(button, [role="button"]),
+html[data-twitter-classic="on"] [data-testid="toolBar"] :is(svg, span) {
+  color: var(--twitter-blue) !important;
+}
+
+/* Right rail cards */
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] section {
+  background-color: var(--twitter-soft) !important;
+  border-color: var(--twitter-border) !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] section [role="link"]:hover {
+  background-color: var(--twitter-soft-hover) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] section a[href] {
+  border-color: var(--twitter-border) !important;
+}
+
+/* Menus, dialogs, tooltips, and the message drawer */
+
+html[data-twitter-classic="on"] :is([role="menu"], [role="listbox"], [data-testid="Dropdown"]),
+html[data-twitter-classic="on"] [role="dialog"]:not(:has([data-testid="swipe-to-dismiss"])) > div,
+html[data-twitter-classic="on"] [data-testid="sheetDialog"] {
+  background-color: #ffffff !important;
+  color: var(--twitter-ink) !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] :is([role="menu"], [role="listbox"], [data-testid="Dropdown"]) {
+  box-shadow: 0 0 15px rgba(101, 119, 134, 0.2), 0 0 3px 1px rgba(101, 119, 134, 0.15) !important;
+}
+
+html[data-twitter-classic="on"] :is([role="menuitem"], [role="option"]) {
+  color: var(--twitter-ink) !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [role="tooltip"] {
+  background-color: var(--twitter-secondary) !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] [role="tooltip"] * {
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="DMDrawer"] {
+  box-shadow: 0 0 15px rgba(101, 119, 134, 0.2), 0 0 3px 1px rgba(101, 119, 134, 0.15) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toast"] {
+  background-color: var(--twitter-blue) !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toast"] * {
+  color: #ffffff !important;
+}
+
+/* Preserve status colors and media. */
+
+html[data-twitter-classic="on"] :is(img, video, canvas, picture) {
+  filter: none !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="videoPlayer"],
+html[data-twitter-classic="on"] [data-testid="videoPlayer"] .r-kemksi,
+html[data-twitter-classic="on"] [data-testid="swipe-to-dismiss"],
+html[data-twitter-classic="on"] [data-testid="swipe-to-dismiss"] .r-kemksi {
+  background-color: #000000 !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="videoPlayer"] :is(.r-1nao33i, button, [role="button"]),
+html[data-twitter-classic="on"] [data-testid="swipe-to-dismiss"] :is(.r-1nao33i, button, [role="button"]) {
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="videoPlayer"] svg,
+html[data-twitter-classic="on"] [data-testid="swipe-to-dismiss"] svg {
+  color: #ffffff;
+}
+
+/* Native-looking light scrollbars on Chromium. */
+
+html[data-twitter-classic="on"] * {
+  scrollbar-color: #cfd9de #ffffff;
+}
+
+html[data-twitter-classic="on"] *::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+html[data-twitter-classic="on"] *::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+html[data-twitter-classic="on"] *::-webkit-scrollbar-thumb {
+  background: #cfd9de;
+  border: 3px solid #ffffff;
+  border-radius: 9999px;
+}
+
+html[data-twitter-classic="on"] *::-webkit-scrollbar-thumb:hover {
+  background: #aab8c2;
+}
+
+@media (max-width: 700px) {
+  html[data-twitter-classic="on"] a[data-twitter-classic-logo="on"]::before {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>Classic Twitter Messages regression</title>
+    <script>
+      history.replaceState(null, "", "/i/chat");
+      window.chrome = {
+        runtime: {
+          getURL(path) {
+            return `/assets/${path.split("/").pop()}`;
+          }
+        }
+      };
+    </script>
+    <link rel="stylesheet" href="/styles/twitter-light.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-refinement.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-leak-fixes.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-stable-hooks.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-v12-final.css">
+    <style>
+      :root[data-theme="dark"] {
+        --fixture-background: #000000;
+        --fixture-gray-0: #16181c;
+        --fixture-gray-50: #202327;
+        --fixture-text: #e7e9ea;
+      }
+      :root[data-theme="light"] {
+        --fixture-background: #ffffff;
+        --fixture-gray-0: #f5f8fa;
+        --fixture-gray-50: #e6ecf0;
+        --fixture-text: #14171a;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px Arial, sans-serif; }
+      [data-testid="dm-container"] { display: grid; grid-template-columns: 500px 1fr; min-height: 700px; background: var(--fixture-background); color: var(--fixture-text); }
+      [data-testid="dm-inbox-panel"] { border-right: 1px solid #2f3336; background: var(--fixture-background); }
+      [data-testid="dm-search-bar"] { margin: 16px; padding: 12px; background: var(--fixture-gray-50); }
+      [data-testid^="dm-conversation-item-"] [role="option"] .bg-gray-0 { padding: 22px; background: var(--fixture-gray-0); }
+      [data-testid="dm-conversation-panel"] { position: relative; background: var(--fixture-background); }
+      [data-testid="dm-conversation-header"] { padding: 18px; background: linear-gradient(#000000, var(--fixture-background)); }
+      [data-testid="dm-message-list"] { padding: 20px; }
+      [data-testid^="message-text-"] { width: max-content; max-width: 420px; margin: 14px; padding: 12px 18px; border-radius: 9999px; }
+      .bg-gray-50 { background: var(--fixture-gray-50); color: var(--fixture-text); }
+      .bg-chat-accent { margin-left: auto; background: #1da1f2; }
+      .text-white { color: #ffffff; }
+      [data-testid="dm-composer-container"] { position: absolute; inset: auto 0 0; padding: 16px; background: linear-gradient(transparent, var(--fixture-background)); }
+      [data-testid="dm-composer-form"] { display: flex; gap: 8px; background: var(--fixture-background); }
+      [data-testid="dm-composer-input-container"] { flex: 1; padding: 10px 16px; background: var(--fixture-gray-50); }
+      button { background: var(--fixture-gray-0); color: var(--fixture-text); }
+    </style>
+  </head>
+  <body>
+    <main role="main">
+      <div data-testid="dm-container">
+        <section data-testid="dm-inbox-panel">
+          <header data-testid="dm-inbox-header"><h1 data-testid="dm-inbox-title">Chat</h1></header>
+          <div data-testid="dm-search-bar"><input placeholder="Search" aria-label="Search messages"></div>
+          <div data-testid="dm-conversation-item-mat"><div role="option"><div class="bg-gray-0">Mat</div></div></div>
+        </section>
+        <section data-testid="dm-conversation-panel">
+          <header data-testid="dm-conversation-header">
+            <button data-testid="app-bar-back" aria-label="Back"><svg><path fill="#eff3f4" d="M16 3L5 10l11 7z"></path></svg></button>
+            <strong data-testid="dm-conversation-username">Mat</strong>
+          </header>
+          <div data-testid="dm-message-list-container">
+            <div data-testid="dm-message-list">
+              <div data-testid="message-1"><div data-testid="message-text-1" class="bg-gray-50"><span>Incoming message</span></div></div>
+              <div data-testid="message-2"><div data-testid="message-text-2" class="bg-chat-accent"><span class="text-white">Outgoing message</span></div></div>
+            </div>
+          </div>
+          <footer data-testid="dm-composer-container">
+            <form data-testid="dm-composer-form">
+              <button data-testid="dm-composer-attachment-button"><svg><path d="M0 0h10v10H0z"></path></svg></button>
+              <button data-testid="dm-composer-gif-button"><svg><path d="M0 0h10v10H0z"></path></svg></button>
+              <div data-testid="dm-composer-input-container"><textarea data-testid="dm-composer-textarea" placeholder="Unencrypted message"></textarea></div>
+            </form>
+          </footer>
+        </section>
+      </div>
+    </main>
+
+    <script src="/scripts/content.js"></script>
+    <script src="/scripts/home-refinement.js"></script>
+    <script src="/scripts/v12-theme-fixes.js"></script>
+  </body>
+</html>

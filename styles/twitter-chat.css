@@ -1,0 +1,197 @@
+/* X Chat renders inside open shadow roots. Its native palette tokens must be
+   overridden inside those roots; the document's stylesheet cannot reach them. */
+:host([data-twitter-classic-chat-host="on"]),
+:host([data-twitter-classic-chat-host="on"]) * {
+  --background: 0 0% 100% !important;
+  --foreground: 210 12% 9% !important;
+  --border: 204 17% 92% !important;
+  --x-bg-primary: var(--twitter-surface, #ffffff) !important;
+  --x-bg-secondary: var(--twitter-soft, #f5f8fa) !important;
+  --x-bg-tertiary: var(--twitter-input, #e6ecf0) !important;
+  --x-bg-inputs: var(--twitter-input, #e6ecf0) !important;
+  --x-bg-sheets: var(--twitter-surface, #ffffff) !important;
+  --x-bg-modal: var(--twitter-surface, #ffffff) !important;
+  --x-fg-primary: var(--twitter-ink, #14171a) !important;
+  --x-fg-secondary: var(--twitter-secondary, #657786) !important;
+  --x-fg-tertiary: var(--twitter-secondary, #657786) !important;
+  --x-fg-inverted: #ffffff !important;
+  --x-fg-brand: var(--twitter-blue, #1da1f2) !important;
+  --x-fg-on-color: #ffffff !important;
+  --x-border-normal: var(--twitter-border, #e6ecf0) !important;
+  --x-border-hover: var(--twitter-border, #e6ecf0) !important;
+  --x-border-elevated: var(--twitter-border, #e6ecf0) !important;
+  --x-border-active: var(--twitter-blue, #1da1f2) !important;
+  --x-btn-primary: var(--twitter-blue, #1da1f2) !important;
+  --x-btn-primary-hover: var(--twitter-blue-hover, #1a91da) !important;
+  --x-btn-primary-pressed: var(--twitter-blue-hover, #1a91da) !important;
+  --x-btn-secondary: var(--twitter-soft, #f5f8fa) !important;
+  --x-btn-secondary-hover: var(--twitter-soft-hover, #e8f5fd) !important;
+  --x-btn-secondary-pressed: color-mix(in srgb, var(--twitter-blue, #1da1f2) 20%, var(--twitter-surface, #ffffff)) !important;
+  --x-btn-tertiary: var(--twitter-input, #e6ecf0) !important;
+  --x-btn-tertiary-hover: var(--twitter-soft-hover, #e8f5fd) !important;
+  --x-btn-tertiary-pressed: color-mix(in srgb, var(--twitter-blue, #1da1f2) 20%, var(--twitter-surface, #ffffff)) !important;
+  --x-btn-brand: var(--twitter-blue, #1da1f2) !important;
+  --x-btn-brand-hover: var(--twitter-blue-hover, #1a91da) !important;
+  --x-btn-brand-pressed: var(--twitter-blue-hover, #1a91da) !important;
+  --x-btn-ghost-hover: var(--twitter-soft-hover, #e8f5fd) !important;
+  --x-btn-ghost-pressed: color-mix(in srgb, var(--twitter-blue, #1da1f2) 20%, var(--twitter-surface, #ffffff)) !important;
+  --x-ring: var(--twitter-blue, #1da1f2) !important;
+  --x-fg-alpha-10: color-mix(in srgb, var(--twitter-ink, #14171a) 10%, transparent) !important;
+  --x-fg-alpha-20: color-mix(in srgb, var(--twitter-ink, #14171a) 20%, transparent) !important;
+  --x-fg-alpha-30: color-mix(in srgb, var(--twitter-ink, #14171a) 30%, transparent) !important;
+  --x-fg-alpha-40: color-mix(in srgb, var(--twitter-ink, #14171a) 40%, transparent) !important;
+  --x-fg-alpha-50: color-mix(in srgb, var(--twitter-ink, #14171a) 50%, transparent) !important;
+  --x-fg-alpha-60: color-mix(in srgb, var(--twitter-ink, #14171a) 60%, transparent) !important;
+  --x-fg-alpha-70: color-mix(in srgb, var(--twitter-ink, #14171a) 70%, transparent) !important;
+  --x-fg-alpha-80: color-mix(in srgb, var(--twitter-ink, #14171a) 80%, transparent) !important;
+  --x-fg-alpha-90: color-mix(in srgb, var(--twitter-ink, #14171a) 90%, transparent) !important;
+  --x-fg-alpha-100: var(--twitter-ink, #14171a) !important;
+  --x-bg-alpha-0: transparent !important;
+  --x-bg-alpha-10: color-mix(in srgb, var(--twitter-surface, #ffffff) 10%, transparent) !important;
+  --x-bg-alpha-20: color-mix(in srgb, var(--twitter-surface, #ffffff) 20%, transparent) !important;
+  --x-bg-alpha-30: color-mix(in srgb, var(--twitter-surface, #ffffff) 30%, transparent) !important;
+  --x-bg-alpha-40: color-mix(in srgb, var(--twitter-surface, #ffffff) 40%, transparent) !important;
+  --x-bg-alpha-50: color-mix(in srgb, var(--twitter-surface, #ffffff) 50%, transparent) !important;
+  --x-bg-alpha-60: color-mix(in srgb, var(--twitter-surface, #ffffff) 60%, transparent) !important;
+  --x-bg-alpha-70: color-mix(in srgb, var(--twitter-surface, #ffffff) 70%, transparent) !important;
+  --x-bg-alpha-80: color-mix(in srgb, var(--twitter-surface, #ffffff) 80%, transparent) !important;
+  --x-bg-alpha-90: color-mix(in srgb, var(--twitter-surface, #ffffff) 90%, transparent) !important;
+  --x-bg-alpha-100: var(--twitter-surface, #ffffff) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"][data-twitter-classic-theme="dim"]),
+:host([data-twitter-classic-chat-host="on"][data-twitter-classic-theme="dim"]) * {
+  --background: 210 30% 13% !important;
+  --foreground: 0 0% 100% !important;
+  --border: 206 16% 26% !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) {
+  background-color: var(--twitter-surface, #ffffff) !important;
+  color: var(--twitter-ink, #14171a) !important;
+  color-scheme: light !important;
+}
+
+:host([data-twitter-classic-chat-host="on"][data-twitter-classic-theme="dim"]) {
+  color-scheme: dark !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  .bg-background,
+  [data-testid="dm-container"],
+  [data-testid="dm-inbox-panel"],
+  [data-testid="dm-conversation-panel"],
+  [data-testid="dm-conversation-header"],
+  [data-testid="dm-composer-container"],
+  [data-testid="dm-composer-form"],
+  [data-testid="dm-empty-conversation"]
+) {
+  background-color: var(--twitter-surface, #ffffff) !important;
+  background-image: none !important;
+  color: var(--twitter-ink, #14171a) !important;
+  border-color: var(--twitter-border, #e6ecf0) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid="dm-search-input"],
+  [data-testid="dm-composer-input-container"]
+) {
+  background-color: var(--twitter-input, #e6ecf0) !important;
+  color: var(--twitter-ink, #14171a) !important;
+  border-color: transparent !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-testid="dm-search-bar"] {
+  background-color: transparent !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-twitter-classic-surface="surface"] {
+  background-color: var(--twitter-surface, #ffffff) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-twitter-classic-surface="soft"] {
+  background-color: var(--twitter-soft, #f5f8fa) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-twitter-classic-ui-text="on"] {
+  color: var(--twitter-ink, #14171a) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-twitter-classic-border="on"] {
+  border-color: var(--twitter-border, #e6ecf0) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(input, textarea, [contenteditable="true"]) {
+  color: var(--twitter-ink, #14171a) !important;
+  caret-color: var(--twitter-blue, #1da1f2) !important;
+  font-family: inherit !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(input, textarea)::placeholder {
+  color: var(--twitter-secondary, #657786) !important;
+  opacity: 1 !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid="dm-inbox-title"],
+  [data-testid="dm-empty-conversation-title"],
+  [data-testid="dm-conversation-username"],
+  .text-primary,
+  .text-foreground
+) {
+  color: var(--twitter-ink, #14171a) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(.text-secondary, .text-tertiary) {
+  color: var(--twitter-secondary, #657786) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid^="dm-conversation-item-"],
+  [role="option"]
+):is(:hover, :focus-visible, [aria-selected="true"]) {
+  background-color: var(--twitter-soft-hover, #e8f5fd) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid="dm-composer-attachment-button"],
+  [data-testid="dm-composer-gif-button"],
+  [data-testid="dm-composer-emoji-button"],
+  [data-testid="dm-composer-voice-button"],
+  [data-testid="dm-new-chat-button"]
+) {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  color: var(--twitter-blue, #1da1f2) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid="dm-empty-conversation-new-chat-button"],
+  .bg-btn-primary,
+  .bg-btn-brand
+) {
+  background-color: var(--twitter-blue, #1da1f2) !important;
+  color: #ffffff !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) :is(
+  [data-testid="dm-empty-conversation-new-chat-button"],
+  .bg-btn-primary,
+  .bg-btn-brand
+) :is(.text-inverted, .text-primary, span) {
+  color: #ffffff !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-testid^="message-text-"]:not(.bg-chat-accent) {
+  background-color: var(--twitter-soft, #f5f8fa) !important;
+  color: var(--twitter-ink, #14171a) !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) .bg-chat-accent {
+  background-color: var(--twitter-blue, #1da1f2) !important;
+  color: #ffffff !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) .bg-chat-accent :is(div, span, p, time) {
+  color: #ffffff !important;
+}

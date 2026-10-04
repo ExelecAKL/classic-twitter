@@ -1,0 +1,239 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Classic Twitter current UI regression fixture</title>
+    <script>
+      (() => {
+        const page = new URLSearchParams(location.search).get("page") === "chat" ? "chat" : "home";
+        document.documentElement.dataset.fixturePage = page;
+        history.replaceState(null, "", page === "chat" ? "/i/chat" : "/home");
+        const settings = { deElon: true, getBackToX: false, classicDark: false };
+        const listeners = [];
+        window.chrome = {
+          runtime: { id: "current-regression-fixture", getURL: (path) => `/${path}` },
+          storage: {
+            local: {
+              get(keys, callback) {
+                const result = typeof keys === "string"
+                  ? { [keys]: settings[keys] }
+                  : Array.isArray(keys)
+                    ? Object.fromEntries(keys.map((key) => [key, settings[key]]))
+                    : { ...keys, ...settings };
+                if (callback) queueMicrotask(() => callback(result));
+                return Promise.resolve(result);
+              },
+              set(values, callback) {
+                const changes = {};
+                for (const [key, newValue] of Object.entries(values)) {
+                  changes[key] = { oldValue: settings[key], newValue };
+                  settings[key] = newValue;
+                }
+                queueMicrotask(() => {
+                  listeners.forEach((listener) => listener(changes, "local"));
+                  callback?.();
+                });
+                return Promise.resolve();
+              }
+            },
+            onChanged: { addListener: (listener) => listeners.push(listener) }
+          }
+        };
+        window.fixtureSetOptions = (values) => chrome.storage.local.set(values);
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles/twitter-light.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-refinement.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-leak-fixes.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-stable-hooks.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-v12-final.css">
+    <link rel="stylesheet" href="/styles/twitter-v13.css">
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px Arial, sans-serif; background: #000; color: #eff3f4; }
+      #react-root { display: grid; grid-template-columns: 245px minmax(0, 680px) 360px; min-height: 950px; }
+      header[role="banner"] { padding: 16px; }
+      header h1 { margin: 0 0 16px; }
+      header h1 a { display: inline-flex; width: 48px; height: 48px; }
+      nav a { display: flex; width: 100%; color: #eff3f4; text-decoration: none; }
+      nav a > div { display: inline-flex; align-items: center; gap: 18px; padding: 12px; border-radius: 9999px; }
+      nav a:hover { background: #16181c; }
+      nav a:hover > div { background: #333639; }
+      nav svg { width: 28px; height: 28px; }
+      nav span { font-size: 20px; font-weight: 700; }
+      [data-testid="primaryColumn"] { border-inline: 1px solid #2f3336; }
+      [role="tablist"] { display: flex; height: 54px; }
+      [role="tab"] { flex: 1; border: 0; background: #000; color: #eff3f4; }
+      #composer { display: flex; gap: 12px; padding: 16px; border-bottom: 1px solid #000; }
+      #composer-body { flex: 1; min-width: 0; }
+      #editor-shell { position: relative; min-height: 90px; }
+      #editor { min-height: 88px; padding: 12px 0; outline: 0; font-size: 20px; }
+      .public-DraftEditorPlaceholder-root { position: absolute; left: 0; top: 12px; color: #71767b; font-size: 20px; pointer-events: none; }
+      #action-row, [data-testid="toolBar"] { display: flex; align-items: center; gap: 8px; }
+      [data-testid="toolBar"] { flex: 1; }
+      [data-testid="toolBar"] button { width: 34px; height: 34px; border: 1px solid #2f3336; border-radius: 50%; background: #000; color: #1d9bf0; }
+      button svg { width: 22px; height: 22px; }
+      #counter { width: 20px; height: 20px; flex: 0 0 20px; }
+      #counter svg { width: 20px; height: 20px; transform: rotate(-90deg); }
+      #tweet-submit { border: 0; border-radius: 9999px; padding: 10px 18px; background: #1d9bf0; color: #fff; }
+      article { padding: 16px; border-bottom: 1px solid #2f3336; }
+      .tweet-content { margin-left: 60px; }
+      .tweet-author { display: flex; gap: 10px; }
+      .avatar { position: relative; z-index: 0; width: 48px; height: 48px; overflow: hidden; border-radius: 50%; flex: 0 0 48px; }
+      .native-image-layer { position: absolute; inset: 0; z-index: -1; background-position: center; background-repeat: no-repeat; background-size: cover; }
+      .native-image-layer > img { width: 100%; height: 100%; opacity: 0; }
+      .avatar-overlay { position: absolute; inset: 0; background: transparent; }
+      #media-carousel { position: relative; display: flex; width: 100%; overflow: hidden; border: 1px solid #2f3336; border-radius: 16px; }
+      #media-carousel > [role="tablist"] { width: 100%; display: flex; height: auto; }
+      #media-carousel [role="presentation"] { flex: 0 0 50%; min-width: 0; }
+      .photo-card { position: relative; overflow: hidden; }
+      .photo-card + .photo-card { border-left: 2px solid #000; }
+      .aspect-spacer { width: 100%; padding-bottom: 125%; }
+      .photo-native-layer { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; }
+      .photo-native-layer img { position: absolute; width: 100%; height: 100%; opacity: 0; }
+      #media-caption { padding-block: 8px 12px; }
+      #tweet-actions { display: flex; justify-content: space-between; margin-top: 14px; color: #71767b; }
+      aside { padding: 12px; }
+      #search-form, #search-pill, #search-inner { height: 48px; border-radius: 9999px; background: #16181c; }
+      #search-pill { display: flex; align-items: center; gap: 8px; padding-inline: 12px; }
+      #search-pill svg { width: 22px; height: 22px; flex: 0 0 22px; }
+      #search-inner { flex: 1; display: flex; align-items: center; }
+      #search-input { width: 100%; border: 0; background: #16181c; color: #eff3f4; }
+      #search-form:focus-within, #search-pill:focus-within, #search-inner:focus-within { border: 1px solid #1d9bf0; }
+      #search-results { margin-top: 8px; }
+      #search-results > [role="option"] { display: flex; align-items: center; gap: 10px; padding: 10px; background: #000; }
+      #search-results > [role="option"]:hover, #search-results > [aria-selected="true"] { background: #16181c; }
+      #trend-card { padding: 16px; margin-top: 20px; border: 1px solid #2f3336; border-radius: 16px; }
+      #trend-card:hover { background: #16181c; }
+      #menu-row { padding: 10px; margin-top: 16px; }
+      #menu-row:hover { background: #16181c; }
+      html[data-fixture-page="chat"] #home-main, html[data-fixture-page="chat"] aside { display: none; }
+      html[data-fixture-page="home"] #chat-main { display: none; }
+      html[data-fixture-page="chat"] #react-root { grid-template-columns: 145px 1fr; }
+      #chat-root { display: grid; grid-template-columns: 380px 1fr; min-height: 820px; background: #000; color: #eff3f4; }
+      #chat-inbox { background: #000; border-right: 1px solid #2f3336; }
+      #chat-inbox header { display: flex; align-items: center; justify-content: space-between; padding: 18px; }
+      #chat-search { display: flex; gap: 12px; align-items: center; margin: 16px; border-radius: 9999px; background: #131313; padding: 12px; }
+      #chat-search input { border: 0; background: transparent; color: #eff3f4; }
+      #chat-list > button { display: flex; gap: 14px; width: 100%; border: 0; padding: 18px; background: #000; color: #eff3f4; text-align: left; }
+      #chat-list > button:hover { background: #16181c; }
+      #chat-screen { display: flex; flex-direction: column; position: relative; background: #000; }
+      #chat-screen-header { padding: 18px; background: #000; border-bottom: 1px solid #2f3336; }
+      #chat-messages { flex: 1; padding: 20px; background: #000; }
+      #chat-messages > div { width: max-content; max-width: 85%; border-radius: 20px; padding: 12px 18px; margin-bottom: 12px; }
+      #incoming-bubble { background: #202327; color: #eff3f4; }
+      #outgoing-bubble { background: #1d9bf0; color: #fff; margin-left: auto; }
+      #chat-composer { display: flex; gap: 12px; align-items: center; padding: 16px; background: #000; }
+      #chat-composer button, #chat-new-button { border: 1px solid #2f3336; border-radius: 50%; padding: 8px; background: #16181c; color: #eff3f4; }
+      #chat-input-shell { flex: 1; border-radius: 9999px; background: #131313; padding: 12px; }
+      #chat-input { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: #eff3f4; }
+    </style>
+  </head>
+  <body>
+    <div id="react-root">
+      <header role="banner">
+        <h1><a href="/home" aria-label="X"><svg viewBox="0 0 24 24"><path d="M3 3 21 21M21 3 3 21"></path></svg></a></h1>
+        <nav aria-label="Primary">
+          <a id="home-nav" role="link" href="/home" aria-current="page"><div id="home-pill"><div class="icon-slot"><svg viewBox="0 0 24 24"><path d="M2 10 12 2l10 8v12H2z"></path></svg></div><span>Home</span></div></a>
+          <a id="explore-nav" role="link" href="/explore"><div id="explore-pill"><div><svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16m6 14 6 6"></path></svg></div><span>Explore</span></div></a>
+        </nav>
+      </header>
+      <main id="home-main" role="main">
+        <div data-testid="primaryColumn">
+          <div role="tablist"><button role="tab" aria-selected="true">For you</button><button role="tab">Following</button></div>
+          <section id="composer">
+            <div class="avatar" data-testid="Tweet-User-Avatar"><div id="composer-avatar" class="native-image-layer" style="background-image: url('/assets/icon-128.png')"><img alt="" src="/assets/icon-128.png"></div></div>
+            <div id="composer-body">
+              <div id="editor-shell" data-testid="tweetTextarea_0RichTextInputContainer">
+                <div id="draft-placeholder" class="public-DraftEditorPlaceholder-root"><div class="public-DraftEditorPlaceholder-inner">What’s happening?</div></div>
+                <div id="editor" class="public-DraftEditor-content" data-testid="tweetTextarea_0" contenteditable="true" role="textbox" aria-label="Post text"><div data-contents="true"><div data-block="true"><div class="public-DraftStyleDefault-block"><br></div></div></div></div>
+              </div>
+              <div id="action-row">
+                <div data-testid="toolBar"><button aria-label="Add photos or video"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M2 3h20v18H2zm3 14 5-5 4 4 3-2 3 3z"></path></svg></button><button aria-label="Add a GIF"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h18v18H3z"></path></svg></button><button aria-label="Add emoji"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20"></path></svg></button></div>
+                <div id="counter" role="progressbar" aria-label="Character count" aria-valuemin="0" aria-valuemax="100" aria-valuenow="10"><svg viewBox="0 0 20 20"><circle id="counter-track" cx="10" cy="10" r="8" fill="none" stroke="rgb(47, 51, 54)" stroke-width="2"></circle><circle id="counter-progress" cx="10" cy="10" r="8" fill="none" stroke="rgb(29, 155, 240)" stroke-width="2" stroke-dasharray="50.26548245743669" stroke-dashoffset="45.23893421169302"></circle></svg></div>
+                <button id="tweet-submit" data-testid="tweetButtonInline" aria-disabled="true"><span>Post</span></button>
+              </div>
+            </div>
+          </section>
+          <article data-testid="tweet" id="photo-tweet">
+            <div class="tweet-author"><div class="avatar" data-testid="Tweet-User-Avatar"><div id="tweet-avatar" class="native-image-layer" style="background-image: url('/assets/icon-128.png')"><img alt="Fixture author" src="/assets/icon-128.png"></div></div><div data-testid="User-Name">Fixture author @fixture · 2h</div></div>
+            <div class="tweet-content">
+              <div data-testid="tweetText" id="media-caption">Two photos with their original carousel dimensions.</div>
+              <div data-testid="ScrollSnap-SwipeableList" id="media-carousel"><div data-testid="ScrollSnap-List" role="tablist" id="media-tablist"><div role="presentation"><div data-testid="tweetPhoto" class="photo-card" id="photo-one"><div id="photo-one-spacer" class="aspect-spacer"></div><div id="photo-one-bg" class="photo-native-layer" style="background-image: url('/assets/twitter-login-background.png')"><img alt="First carousel photo" src="/assets/twitter-login-background.png"></div></div></div><div role="presentation"><div data-testid="tweetPhoto" class="photo-card" id="photo-two"><div class="aspect-spacer"></div><div id="photo-two-bg" class="photo-native-layer" style="background-image: url('/assets/twitter-login-background.png')"><img alt="Second carousel photo" src="/assets/twitter-login-background.png"></div></div></div></div></div>
+              <div id="tweet-actions"><span>2 replies</span><span>5 retweets</span><span>118 likes</span></div>
+            </div>
+          </article>
+        </div>
+      </main>
+      <aside data-testid="sidebarColumn">
+        <form role="search" id="search-form"><div id="search-pill"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16m6 14 6 6"></path></svg><div id="search-inner"><input id="search-input" data-testid="SearchBox_Search_Input" placeholder="Search" aria-label="Search"></div></div></form>
+        <div id="search-results" role="listbox">
+          <div id="recent-option" role="option" aria-selected="false"><div class="avatar"><div id="recent-avatar" class="native-image-layer" style="background-image: url('/assets/icon-128.png')"><img alt="Recent profile" src="/assets/icon-128.png"></div><div id="recent-avatar-overlay" class="avatar-overlay"></div></div><span>Recent profile @fixture</span></div>
+          <div id="selected-option" role="option" aria-selected="true"><span>Saved search</span></div>
+        </div>
+        <section id="trend-card" data-testid="trend"><h2>What’s happening</h2><span>Trending topic</span></section>
+        <div id="menu-row" role="menuitem">Settings and privacy</div>
+      </aside>
+      <main id="chat-main" role="main"><div id="chat-shadow-host" data-testid="xchatEmbedRoute"></div><div id="chat-overlays-host" data-testid="xchatEmbedOverlays"></div></main>
+      <template id="chat-template">
+        <style>
+          :host { --x-bg-primary: #000; --x-bg-secondary: #131313; --x-fg-primary: #eff3f4; --x-fg-secondary: #71767b; --x-border-primary: #2f3336; --x-color-accent: #1d9bf0; display: block; }
+          * { box-sizing: border-box; }
+          .font-chirp { font-family: TwitterChirp, Arial, sans-serif; }
+          .bg-background, .bg-black { background: var(--x-bg-primary); }
+          .text-foreground { color: var(--x-fg-primary); }
+          .bg-gray-50 { background: var(--x-bg-secondary); }
+          #chat-root { display: grid; grid-template-columns: 380px 1fr; min-height: 820px; }
+          #chat-inbox { border-right: 1px solid var(--x-border-primary); }
+          #chat-inbox header { display: flex; align-items: center; justify-content: space-between; padding: 18px; }
+          #chat-search { display: flex; align-items: center; margin: 16px; border-radius: 9999px; padding: 12px; }
+          #chat-search input { border: 0; background: transparent; color: var(--x-fg-primary); }
+          #chat-list > button { display: flex; gap: 14px; width: 100%; border: 0; padding: 18px; background: var(--x-bg-primary); color: var(--x-fg-primary); text-align: left; }
+          #chat-list > button:hover { background: #16181c; }
+          #chat-screen { display: flex; flex-direction: column; }
+          #chat-screen-header { padding: 18px; border-bottom: 1px solid var(--x-border-primary); }
+          #chat-messages { flex: 1; padding: 20px; }
+          #chat-messages > div { width: max-content; max-width: 85%; border-radius: 20px; padding: 12px 18px; margin-bottom: 12px; }
+          #incoming-bubble { color: var(--x-fg-primary); }
+          .bg-chat-accent { background: #1d9bf0; margin-left: auto; }
+          .text-white { color: #fff; }
+          #chat-composer { display: flex; gap: 12px; align-items: center; padding: 16px; }
+          button { border: 1px solid var(--x-border-primary); border-radius: 50%; padding: 8px; background: var(--x-bg-secondary); color: var(--x-fg-primary); }
+          button svg { width: 22px; height: 22px; }
+          #chat-input-shell { flex: 1; border-radius: 9999px; padding: 12px; }
+          #chat-input { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--x-fg-primary); }
+          .avatar { position: relative; z-index: 0; width: 48px; height: 48px; overflow: hidden; border-radius: 50%; flex: 0 0 48px; }
+          .native-image-layer { position: absolute; inset: 0; z-index: -1; background-position: center; background-size: cover; }
+          .native-image-layer > img { width: 100%; height: 100%; opacity: 0; }
+        </style>
+        <div id="chat-root" data-testid="dm-container" class="flex h-full bg-background font-chirp text-body text-foreground">
+          <div id="chat-inbox" data-testid="dm-inbox-panel" class="flex flex-col bg-background text-foreground">
+            <header><h1 id="chat-heading">Chat</h1><button id="chat-new-button" aria-label="New chat"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h18v18H3z"></path></svg></button></header>
+            <div id="chat-search" data-testid="dm-search-bar" class="bg-gray-50"><input placeholder="Search" aria-label="Search conversations"></div>
+            <div id="chat-list"><button role="option" aria-selected="true" class="bg-gray-0"><div class="avatar"><div id="chat-avatar" class="native-image-layer" style="background-image: url('/assets/icon-128.png')"><img alt="Conversation profile" src="/assets/icon-128.png"></div></div><span>Fixture conversation</span></button></div>
+          </div>
+          <div id="chat-screen" data-testid="dm-conversation-panel" class="flex flex-col bg-background text-foreground">
+            <header id="chat-screen-header" data-testid="dm-conversation-header"><strong>Fixture conversation</strong></header>
+            <div id="chat-messages" data-testid="dm-message-list" class="bg-black"><div id="incoming-bubble" data-testid="message-text-incoming" class="bg-gray-50"><span>Incoming message</span></div><div id="outgoing-bubble" data-testid="message-text-outgoing" class="bg-chat-accent"><span class="text-white">Outgoing message</span></div></div>
+            <form id="chat-composer" data-testid="dm-composer-form" class="bg-background"><button data-testid="dm-composer-attachment-button" aria-label="Attach file"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h18v18H3z"></path></svg></button><div id="chat-input-shell" data-testid="dm-composer-input-container" class="bg-gray-50"><textarea id="chat-input" data-testid="dm-composer-textarea" placeholder="Unencrypted message" aria-label="Message"></textarea></div></form>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div id="current-results" aria-live="polite" style="position: fixed; right: 8px; bottom: 8px; z-index: 999999; max-width: 470px; max-height: 360px; overflow: auto; padding: 12px; background: white; color: black; border: 1px solid #cfd9de">Current UI checks running…</div>
+    <script>
+      window.fixtureMountChat = () => {
+        const host = document.getElementById("chat-shadow-host");
+        const shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
+        shadow.replaceChildren(document.getElementById("chat-template").content.cloneNode(true));
+        const overlaysHost = document.getElementById("chat-overlays-host");
+        const overlayShadow = overlaysHost.shadowRoot || overlaysHost.attachShadow({ mode: "open" });
+        overlayShadow.innerHTML = '<style>:host { --x-bg-primary: #000; --x-fg-primary: #eff3f4; } #shadow-dialog { padding: 12px; background: var(--x-bg-primary); color: var(--x-fg-primary); }</style><div id="shadow-dialog" role="dialog" aria-label="Chat menu">New conversation</div>';
+      };
+      window.fixtureMountChat();
+    </script>
+    <script src="/scripts/v13-main.js"></script>
+    <script src="/tests/current-regression-fixture.js"></script>
+  </body>
+</html>

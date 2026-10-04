@@ -1,0 +1,271 @@
+/* v1.2 dynamic leak fixes -------------------------------------------------
+   X renders menus, dialogs, search suggestions, and Messages in portals
+   whose generated classes change frequently. dynamic-theme-fixes.js marks
+   the actual dark surfaces after each React render; this sheet gives those
+   markers the classic 2019 light palette. */
+
+html[data-twitter-classic="on"] {
+  --twitter-classic-selected: #e8f5fd !important;
+  --twitter-classic-shadow: 0 0 15px rgba(101, 119, 134, 0.2),
+    0 0 3px 1px rgba(101, 119, 134, 0.15) !important;
+}
+
+/* Computed-style surface normalization. */
+
+html[data-twitter-classic="on"] [data-twitter-classic-surface="light"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-surface="soft"] {
+  background-color: var(--twitter-soft) !important;
+  background-image: none !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-surface="selected"] {
+  background-color: var(--twitter-classic-selected) !important;
+  background-image: none !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-text="dark"] {
+  color: var(--twitter-ink) !important;
+  text-shadow: none !important;
+}
+
+html[data-twitter-classic="on"] svg[data-twitter-classic-text="dark"] {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html[data-twitter-classic="on"] svg[data-twitter-classic-text="dark"] path:not([fill="none"]) {
+  fill: currentColor !important;
+}
+
+html[data-twitter-classic="on"] svg[data-twitter-classic-text="dark"] :is(path[fill="none"], [stroke]) {
+  stroke: currentColor !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-border="light"] {
+  border-color: var(--twitter-border) !important;
+}
+
+/* The masthead bird should float freely, without X's circular outline. */
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"],
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"] > div,
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"] > div > div {
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"]:focus,
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"]:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Search fields are the rounded blue-gray pills used by old Twitter. */
+
+html[data-twitter-classic="on"] [data-twitter-classic-search-shell="on"] {
+  box-sizing: border-box !important;
+  background-color: var(--twitter-border) !important;
+  border-color: transparent !important;
+  border-radius: 9999px !important;
+  box-shadow: none !important;
+}
+
+html[data-twitter-classic="on"] input[data-twitter-classic-search-shell="on"] {
+  background-color: transparent !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-search-shell="on"]:focus-within {
+  background-color: #ffffff !important;
+  border-color: var(--twitter-blue) !important;
+  box-shadow: inset 0 0 0 1px var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-search-shell="on"]:focus-within
+  [data-twitter-classic-search-shell="on"] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Hide only the native For you/Following strip and its + button. The older
+   v1.1 fallback selector is explicitly neutralized so it cannot swallow the
+   composer toolbar when X changes its wrappers. */
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"][data-twitter-classic-home-tabs="closed"]
+  [data-testid="primaryColumn"] :has(> [role="tablist"]) {
+  display: revert !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  [data-twitter-classic-native-tabs="on"],
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  [data-twitter-classic-native-tabs-button="on"] {
+  display: none !important;
+}
+
+/* Portalled menus and suggestions, including the account switcher arrow. */
+
+html[data-twitter-classic="on"] :is(
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="Dropdown"],
+  [data-testid="typeaheadDropdown"]
+) {
+  background-color: #ffffff !important;
+  border-color: var(--twitter-border) !important;
+  color: var(--twitter-ink) !important;
+  box-shadow: var(--twitter-classic-shadow) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="Dropdown"],
+  [data-testid="typeaheadDropdown"]
+)::before,
+html[data-twitter-classic="on"] :is(
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="Dropdown"],
+  [data-testid="typeaheadDropdown"]
+)::after {
+  background-color: #ffffff !important;
+  border-color: transparent transparent #ffffff !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="Dropdown"],
+  [data-testid="typeaheadDropdown"]
+) :is([role="menuitem"], [role="option"], [aria-selected="true"]) {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] :is([role="listbox"], [data-testid="typeaheadDropdown"])
+  [aria-selected="true"] {
+  background-color: var(--twitter-classic-selected) !important;
+}
+
+/* Composer, Timelines, and other non-media dialogs stay white from header to
+   footer. Quoted Tweets inherit dark text instead of dark-mode white text. */
+
+html[data-twitter-classic="on"] [role="dialog"]:not(:has([data-testid="swipe-to-dismiss"]))
+  :is(header, footer, form, [data-testid="toolBar"]),
+html[data-twitter-classic="on"] [data-testid="sheetDialog"]
+  :is(header, footer, form, [data-testid="toolBar"]) {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [role="dialog"]:not(:has([data-testid="swipe-to-dismiss"]))
+  :is([data-testid="tweetText"], [data-testid="User-Name"]),
+html[data-twitter-classic="on"] [data-testid="sheetDialog"]
+  :is([data-testid="tweetText"], [data-testid="User-Name"]) {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [role="dialog"]:not(:has([data-testid="swipe-to-dismiss"]))
+  [data-testid="toolBar"] :is(button, [role="button"], svg),
+html[data-twitter-classic="on"] [data-testid="sheetDialog"]
+  [data-testid="toolBar"] :is(button, [role="button"], svg) {
+  color: var(--twitter-blue) !important;
+}
+
+/* The newer verification upsell has a dark green theme of its own. */
+
+html[data-twitter-classic="on"] [data-twitter-classic-verification-banner="on"] {
+  background-color: var(--twitter-classic-selected) !important;
+  background-image: none !important;
+  border: 1px solid var(--twitter-border) !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-verification-banner="on"]
+  :not(img):not(video) {
+  border-color: var(--twitter-border) !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-verification-banner="on"]
+  :is(a, button, [role="button"]):not(:has(svg)) {
+  background-color: var(--twitter-blue) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-verification-banner="on"]
+  :is(a, button, [role="button"]):not(:has(svg)) * {
+  color: #ffffff !important;
+}
+
+/* Full Messages page. Dynamic markers leave saturated blue outgoing bubbles
+   untouched while converting black incoming bubbles, rows, chrome, and the
+   composer into the classic light palette. */
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"]
+  :is(main[role="main"], [data-testid="primaryColumn"], [data-testid="DMDrawer"]) {
+  background-color: #ffffff !important;
+  color: var(--twitter-ink) !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"] main[role="main"]
+  :is(header, footer) {
+  background-image: none !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"] main[role="main"]
+  [aria-selected="true"] {
+  background-color: var(--twitter-classic-selected) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"] main[role="main"]
+  :is(
+    [data-testid="dmComposerTextInput"],
+    textarea[placeholder*="message" i],
+    input[placeholder*="message" i],
+    [contenteditable="true"][aria-label*="message" i]
+  ) {
+  background-color: var(--twitter-soft) !important;
+  border-color: transparent !important;
+  color: var(--twitter-ink) !important;
+  caret-color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"] main[role="main"]
+  form:has(:is(
+    [data-testid="dmComposerTextInput"],
+    textarea[placeholder*="message" i],
+    input[placeholder*="message" i],
+    [contenteditable="true"][aria-label*="message" i]
+  )) {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="messages"] main[role="main"]
+  form:has(:is(
+    [data-testid="dmComposerTextInput"],
+    textarea[placeholder*="message" i],
+    input[placeholder*="message" i],
+    [contenteditable="true"][aria-label*="message" i]
+  )) :is(button, [role="button"], svg) {
+  color: var(--twitter-blue) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-twitter-classic="on"] * {
+    transition-duration: 0.01ms !important;
+  }
+}

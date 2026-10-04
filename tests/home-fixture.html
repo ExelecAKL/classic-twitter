@@ -1,0 +1,129 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <title>Classic Twitter Home regression</title>
+    <script>
+      history.replaceState(null, "", "/home");
+      window.chrome = {
+        runtime: {
+          getURL(path) {
+            return `/assets/${path.split("/").pop()}`;
+          }
+        }
+      };
+      window.manageTimelineClicks = 0;
+    </script>
+    <link rel="stylesheet" href="/styles/twitter-light.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-refinement.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-leak-fixes.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-stable-hooks.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-v12-final.css">
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px Arial, sans-serif; }
+      #react-root { display: grid; grid-template-columns: 250px 600px 390px; min-height: 900px; }
+      header[role="banner"] { padding: 16px; }
+      header[role="banner"] a { display: grid; width: 52px; height: 52px; place-items: center; border: 1px solid #2f3336; border-radius: 9999px; }
+      [data-testid="primaryColumn"] { border-inline: 1px solid #2f3336; }
+      #native-tabs-shell { height: 66px; background: #16181c; }
+      #native-tabs-row { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+      [role="tablist"] { display: flex; flex: 1; }
+      [role="tab"] { flex: 1; padding: 18px; }
+      #composer { min-height: 150px; padding: 16px; }
+      [data-testid="tweetTextarea_0RichTextInputContainer"] { border: 1px solid #2f3336; padding: 12px; }
+      [data-testid="toolBar"] { display: flex; gap: 12px; min-height: 42px; align-items: center; }
+      aside { padding: 10px; }
+      form[role="search"] { width: 350px; background: #2a2d30; }
+      .search-depth { height: 43px; background: #2a2d30; }
+      #real-search-pill { border-radius: 9999px; }
+      #real-search-pill input { width: 100%; height: 40px; border: 0; background: #2a2d30; color: #e7e9ea; }
+      .dark-surface { background: rgb(20, 20, 20); color: rgb(231, 233, 234); border: 1px solid rgb(47, 51, 54); }
+      [data-testid="HoverCard"] { position: relative; width: 380px; padding: 16px; }
+      [data-testid="HoverCard"] > svg { position: absolute; bottom: -12px; fill: #141414; }
+      [data-testid^="AccountSwitcher_"] { padding: 12px; }
+      [data-testid="verified_profile_visitor_upsell"] { margin: 12px; padding: 20px; background: rgb(0, 37, 26); color: #e7e9ea; }
+      [data-testid="verified_profile_visitor_upsell"] a { display: inline-block; padding: 10px 18px; }
+      #compose-dialog { position: relative; width: 730px; margin: 16px; padding: 0; background: white; }
+      #compose-dialog .dark-header, #compose-dialog .dark-footer { padding: 18px; background: rgb(20, 20, 20); color: rgb(231, 233, 234); }
+      #quote { margin: 12px; padding: 14px; border: 1px solid rgb(47, 51, 54); color: rgb(231, 233, 234); }
+      [data-testid="sheetDialog"] { width: 700px; padding: 16px; }
+      .topic-icon { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: rgb(42, 45, 48); color: rgb(239, 243, 244); }
+      [aria-label^="Pin "] { color: rgb(0, 186, 124); }
+      [role="listbox"] { width: 500px; }
+      [role="option"] { padding: 18px; background: rgb(20, 20, 20); color: rgb(231, 233, 234); }
+      [data-testid="sidebarColumn"] section > div { border: 1px solid #2f3336; padding: 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="react-root">
+      <header role="banner">
+        <h1><a href="/home" aria-label="X"><svg width="28" height="28"><path d="M2 2h24v24H2z"></path></svg></a></h1>
+        <nav><a href="/home" aria-current="page"><span>Home</span></a></nav>
+      </header>
+
+      <main role="main">
+        <div data-testid="primaryColumn">
+          <div id="native-tabs-shell">
+            <div id="native-tabs-row">
+              <div role="tablist"><button role="tab">For you</button><button role="tab">Following</button></div>
+              <button id="manage-timelines" aria-label="Manage timelines" onclick="this.dataset.clicked = 'yes'; window.manageTimelineClicks += 1">+</button>
+            </div>
+          </div>
+          <div role="status">
+            <button aria-label="New posts are available. Push the period key.">
+              <span data-testid="pillLabel">posted</span>
+            </button>
+          </div>
+          <div id="composer">
+            <div data-testid="tweetTextarea_0RichTextInputContainer"><div data-testid="tweetTextarea_0">What’s happening?</div></div>
+            <div data-testid="toolBar"><button aria-label="Add a GIF"><svg><path d="M0 0h10v10H0z"></path></svg></button></div>
+            <button data-testid="tweetButtonInline" aria-disabled="true"><span>Tweet</span></button>
+          </div>
+          <button data-testid="app-bar-back" aria-label="Back"><svg width="20" height="20"><path fill="#eff3f4" d="M16 3L5 10l11 7z"></path></svg></button>
+
+          <div data-testid="verified_profile_visitor_upsell">
+            <button><svg width="18" height="18"><path d="M2 2l14 14M16 2L2 16"></path></svg></button>
+            <strong>@karaage_exc, you aren’t verified yet</strong>
+            <a href="/i/premium_sign_up"><span>Get Verified</span></a>
+          </div>
+
+          <div data-testid="HoverCard" class="dark-surface">
+            <div data-testid="AccountSwitcher_AddAccount_Button">Add an existing account</div>
+            <div data-testid="AccountSwitcher_Logout_Button">Log out @karaage_exc</div>
+            <svg width="24" height="12"><path d="M0 0h24L12 12z"></path></svg>
+          </div>
+
+          <div id="compose-dialog" role="dialog">
+            <div class="dark-header"><button data-testid="app-bar-close"><svg width="20" height="20"><path fill="#eff3f4" d="M2 2l16 16M18 2L2 18"></path></svg></button> Drafts</div>
+            <div data-testid="tweetTextarea_0RichTextInputContainer"><div data-testid="tweetTextarea_0">Add a comment</div></div>
+            <div id="quote"><span data-testid="User-Name">TBS</span><p data-testid="tweetText">Quoted Tweet copy</p></div>
+            <div class="dark-footer"><div data-testid="toolBar"><button aria-label="Add photo"><svg><path d="M0 0h10v10H0z"></path></svg></button></div><button data-testid="tweetButton">Tweet</button></div>
+          </div>
+
+          <div data-testid="sheetDialog" class="dark-surface">
+            <button aria-label="Close"><svg width="20" height="20"><path fill="#eff3f4" d="M2 2l16 16M18 2L2 18"></path></svg></button>
+            <input aria-label="Search timelines" placeholder="Search Twitter">
+            <div class="topic-icon"><svg width="24" height="24"><path fill="currentColor" d="M2 2h20v20H2z"></path></svg></div>
+            <button aria-label="Pin Soccer"><svg width="24" height="24"><path fill="currentColor" d="M10 2h4v20h-4zM2 10h20v4H2z"></path></svg></button>
+          </div>
+
+          <div role="listbox" data-testid="typeaheadDropdown">
+            <div role="option" aria-selected="true" data-testid="typeaheadRecentSearchesItem">Recent account</div>
+          </div>
+        </div>
+      </main>
+
+      <aside data-testid="sidebarColumn">
+        <form role="search">
+          <div class="search-depth"><div class="search-depth"><div id="real-search-pill" class="search-depth"><div class="search-depth"><div class="search-depth"><div class="search-depth"><input data-testid="SearchBox_Search_Input" placeholder="Search"></div></div></div></div></div></div>
+        </form>
+        <section><div>What’s happening</div></section>
+      </aside>
+    </div>
+
+    <script src="/scripts/content.js"></script>
+    <script src="/scripts/home-refinement.js"></script>
+    <script src="/scripts/v12-theme-fixes.js"></script>
+  </body>
+</html>

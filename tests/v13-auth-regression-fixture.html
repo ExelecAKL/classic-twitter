@@ -1,0 +1,153 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Classic Twitter v1.3 auth regression fixture</title>
+    <script>
+      (() => {
+        const values = { deElon: true, getBackToX: false, classicDark: false };
+        const listeners = [];
+        window.chrome = {
+          runtime: {
+            id: "classic-twitter-v13-auth-fixture",
+            getURL(path) { return `/${path.replace(/^\/+/, "")}`; }
+          },
+          storage: {
+            local: {
+              get(keys, callback) {
+                const result = typeof keys === "object" && !Array.isArray(keys)
+                  ? Object.fromEntries(Object.entries(keys).map(([key, fallback]) => [
+                      key,
+                      values[key] === undefined ? fallback : values[key]
+                    ]))
+                  : { ...values };
+                queueMicrotask(() => callback?.(result));
+                return Promise.resolve(result);
+              }
+            },
+            onChanged: { addListener(listener) { listeners.push(listener); } }
+          }
+        };
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles/twitter-light.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-refinement.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-leak-fixes.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-stable-hooks.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-v12-final.css">
+    <link rel="stylesheet" href="/styles/twitter-v13.css">
+    <style>
+      * { box-sizing: border-box; }
+      html, body, #react-root { min-height: 100%; margin: 0; }
+      body { font-family: Arial, sans-serif; }
+      main { display: flex; width: 100vw; min-height: calc(100vh - 56px); }
+      #auth-content { width: 50vw; padding: 80px; }
+      #auth-content h1 { font-size: 54px; }
+      form { width: 480px; }
+      label { display: block; width: 480px; height: 60px; border: 2px solid #00b7ff; }
+      label > div { height: 56px; border: 2px solid #00b7ff; }
+      input { display: block; width: 100%; height: 48px; border: 2px solid #00b7ff; outline: 2px solid #00b7ff; }
+      form button { display: block; width: 480px; height: 52px; margin-top: 20px; background: #cfd9de; }
+      form button > div { display: grid; height: 100%; place-items: center; background: #cfd9de; }
+      #auth-art { position: relative; width: 620px; height: calc(100vh - 56px); }
+      #large-x { width: 480px; height: 480px; }
+      #qr-card { position: absolute; right: 20px; bottom: 20px; width: 220px; height: 260px; padding: 18px; background: #fff; }
+      #qr-shell { width: 148px; height: 148px; }
+      #qr-code { width: 140px; height: 140px; }
+      [role="dialog"] { position: fixed; left: 50%; top: 50%; z-index: 20; width: 820px; height: 720px; transform: translate(-50%, -50%); background: #fff; box-shadow: 0 10px 40px #0004; }
+      #modal-logo { width: 100%; height: 60px; }
+      #modal-x { display: block; width: 48px; height: 48px; margin: auto; }
+      #auth-results { position: fixed; left: 20px; bottom: 20px; z-index: 40; padding: 14px 18px; border-radius: 10px; background: #15202b; color: #fff; }
+      #auth-results[data-status="pass"] { border: 3px solid #17bf63; }
+      #auth-results[data-status="fail"] { border: 3px solid #e0245e; }
+    </style>
+  </head>
+  <body>
+    <div id="react-root">
+      <main>
+        <section id="auth-content">
+          <h1>Happening now.</h1>
+          <form id="native-auth-form">
+            <label>
+              <div><input id="native-auth-input" type="text" aria-label="Email or username"></div>
+            </label>
+            <button id="native-auth-continue" type="button"><div>Continue</div></button>
+          </form>
+        </section>
+        <section id="auth-art">
+          <svg id="large-x" viewBox="0 0 480 480" aria-hidden="true">
+            <path d="M40 40L440 440M440 40L40 440" stroke="black" stroke-width="20"></path>
+          </svg>
+          <aside id="qr-card">
+            <p>Scan to get the app</p>
+            <div id="qr-shell">
+              <svg id="qr-code" viewBox="0 0 140 140" aria-hidden="true">
+                <rect width="140" height="140" fill="white"></rect>
+                <path d="M20 20h30v30H20zM90 20h30v30H90zM20 90h30v30H20z" fill="black"></path>
+                <path d="M55 55l30 30M85 55L55 85" stroke="black" stroke-width="8"></path>
+              </svg>
+            </div>
+          </aside>
+        </section>
+      </main>
+      <div role="dialog" aria-modal="true">
+        <div id="modal-logo">
+          <svg id="modal-x" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M8 8l32 32M40 8L8 40" stroke="black" stroke-width="4"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div id="auth-results" data-status="running">Auth checks running…</div>
+    <script src="/scripts/v13-main.js"></script>
+    <script>
+      (() => {
+        const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+        const isBlue = (value) => {
+          const [red, green, blue] = String(value).match(/[\d.]+/g)?.map(Number) || [];
+          return red >= 20 && red <= 40 && green >= 140 && green <= 175 && blue >= 230;
+        };
+
+        async function run() {
+          await wait(650);
+          const root = document.documentElement;
+          const input = document.getElementById("native-auth-input");
+          const shell = input.closest("label");
+          const button = document.getElementById("native-auth-continue");
+          const art = document.getElementById("auth-art");
+          const modalX = document.getElementById("modal-x");
+          const qrCard = document.getElementById("qr-card");
+          const qrShell = document.getElementById("qr-shell");
+          const checks = [];
+          checks.push(root.getAttribute("data-twitter-classic-landing") === "native");
+          checks.push(input.getAttribute("data-twitter-classic-native-auth-input") === "on");
+          checks.push(shell.getAttribute("data-twitter-classic-native-auth-input-shell") === "on");
+          checks.push(getComputedStyle(input).outlineStyle === "none");
+          checks.push(getComputedStyle(input).borderTopWidth === "0px");
+          checks.push(button.getAttribute("data-twitter-classic-native-auth-filled") === "off");
+          checks.push(art.getAttribute("data-twitter-classic-native-landing-art") === "on");
+          checks.push(art.getBoundingClientRect().width >= innerWidth * 0.48);
+          checks.push(modalX.getAttribute("data-twitter-classic-native-auth-x") === "on");
+          checks.push(getComputedStyle(modalX).visibility === "hidden");
+          checks.push(qrCard.getAttribute("data-twitter-classic-native-qr-card") === "on");
+          checks.push(qrShell.getAttribute("data-twitter-classic-native-qr-media") === "on");
+
+          input.value = "x";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          await wait(50);
+          checks.push(button.getAttribute("data-twitter-classic-native-auth-filled") === "on");
+          checks.push(isBlue(getComputedStyle(button).backgroundColor));
+
+          const passed = checks.every(Boolean);
+          const panel = document.getElementById("auth-results");
+          panel.dataset.status = passed ? "pass" : "fail";
+          panel.textContent = `${passed ? "PASS" : "FAIL"}: ${checks.filter(Boolean).length}/${checks.length} auth checks`;
+          window.v13AuthFixturePassed = passed;
+          window.v13AuthFixtureChecks = checks;
+        }
+        run();
+      })();
+    </script>
+  </body>
+</html>

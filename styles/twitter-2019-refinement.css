@@ -1,0 +1,285 @@
+/* v1.1 visual refinement: match the supplied pre-Elon desktop reference. */
+
+html[data-twitter-classic="on"] {
+  --twitter-blue: #1da1f2 !important;
+  --twitter-blue-hover: #1a91da !important;
+  --twitter-ink: #14171a !important;
+  --twitter-secondary: #657786 !important;
+  --twitter-border: #e6ecf0 !important;
+  --twitter-soft: #f5f8fa !important;
+  --twitter-soft-hover: #e8f5fe !important;
+}
+
+html[data-twitter-classic="on"] body,
+html[data-twitter-classic="on"] :is(button, input, textarea) {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Cover X's boot mark with a local bird until the application shell exists. */
+
+html[data-twitter-classic="on"][data-twitter-classic-ready="loading"]::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483646 !important;
+  display: block !important;
+  background: #ffffff !important;
+  pointer-events: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-ready="loading"]::after {
+  content: "" !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  z-index: 2147483647 !important;
+  display: block !important;
+  width: 54px !important;
+  height: 54px !important;
+  transform: translate(-50%, -50%) !important;
+  background-color: transparent !important;
+  background-image: var(--twitter-classic-bird-image) !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
+  pointer-events: none !important;
+}
+
+/* The full extension URL is supplied by content.js; relative content-script
+   URLs otherwise resolve against https://x.com and leave an empty logo slot. */
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"] {
+  background-color: transparent !important;
+  background-image: var(--twitter-classic-bird-image) !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 30px 30px !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"]::before {
+  content: none !important;
+  display: none !important;
+  background-image: none !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"] > * {
+  display: flex !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] a[data-twitter-classic-logo="on"] svg {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Old Home bar. The sparkle reveals the still-functional modern timeline tabs. */
+
+html[data-twitter-classic="on"] [data-twitter-classic-home-header] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 20 !important;
+  display: flex !important;
+  min-height: 53px !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 14px 0 16px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid var(--twitter-border) !important;
+  color: var(--twitter-ink) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-home-header] h2 {
+  margin: 0 !important;
+  color: var(--twitter-ink) !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  line-height: 24px !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-home-header] button {
+  display: inline-grid !important;
+  width: 38px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  color: var(--twitter-blue) !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-home-header] button:hover,
+html[data-twitter-classic="on"] [data-twitter-classic-home-header] button[aria-expanded="true"] {
+  background: var(--twitter-soft-hover) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"][data-twitter-classic-home-tabs="closed"]
+  [data-testid="primaryColumn"] [role="tablist"],
+html[data-twitter-classic="on"][data-twitter-classic-page="home"][data-twitter-classic-home-tabs="closed"]
+  [data-testid="primaryColumn"] :has(> [role="tablist"]) {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"][data-twitter-classic-home-tabs="open"]
+  [data-testid="primaryColumn"] [role="tablist"] {
+  display: flex !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--twitter-border) !important;
+}
+
+/* Eliminate leaked dark-theme borders throughout application chrome. */
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="primaryColumn"],
+  [data-testid="sidebarColumn"],
+  header[role="banner"],
+  [role="menu"],
+  [role="listbox"],
+  [data-testid="sheetDialog"],
+  [data-testid="DMDrawer"]
+) *:not(
+  [data-testid="videoPlayer"],
+  [data-testid="videoPlayer"] *,
+  [data-testid="swipe-to-dismiss"],
+  [data-testid="swipe-to-dismiss"] *
+) {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="primaryColumn"],
+html[data-twitter-classic="on"] [data-testid="primaryColumn"] > div,
+html[data-twitter-classic="on"] [data-testid="cellInnerDiv"],
+html[data-twitter-classic="on"] article[data-testid="tweet"] {
+  border-color: var(--twitter-border) !important;
+}
+
+/* Restore the blue active item used by the supplied Twitter reference. */
+
+html[data-twitter-classic="on"] header[role="banner"] nav a {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] nav a span {
+  font-weight: 700 !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] nav a[aria-current="page"],
+html[data-twitter-classic="on"] header[role="banner"] nav a[aria-current="page"] :is(span, svg),
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  header[role="banner"] [data-testid="AppTabBar_Home_Link"],
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  header[role="banner"] [data-testid="AppTabBar_Home_Link"] :is(span, svg) {
+  color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] header[role="banner"] nav a[aria-current="page"] svg path,
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  header[role="banner"] [data-testid="AppTabBar_Home_Link"] svg path {
+  fill: currentColor !important;
+}
+
+/* Composer controls: no cyan leakage and no disappearing Tweet label. */
+
+html[data-twitter-classic="on"] [data-testid="toolBar"] :is(button, [role="button"], svg, svg *) {
+  color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toolBar"] svg path:not([fill="none"]) {
+  fill: currentColor !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="toolBar"] svg :is([stroke], path[fill="none"]) {
+  stroke: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+) {
+  background-color: var(--twitter-blue) !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="SideNav_NewTweet_Button"],
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+) :is(span, div[dir="auto"]) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="tweetButton"],
+  [data-testid="tweetButtonInline"]
+)[aria-disabled="true"] {
+  background-color: rgba(29, 161, 242, 0.5) !important;
+  opacity: 1 !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-fallback-label="on"]::after {
+  content: "Tweet" !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+/* Soft search and right rail, with pale row dividers instead of black shells. */
+
+html[data-twitter-classic="on"] form[role="search"],
+html[data-twitter-classic="on"] form[role="search"] > div,
+html[data-twitter-classic="on"] form[role="search"] div:has([data-testid="SearchBox_Search_Input"]),
+html[data-twitter-classic="on"] form[role="search"] [data-testid="SearchBox_Search_Input"] {
+  background-color: var(--twitter-border) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] form[role="search"] * {
+  border-color: transparent !important;
+}
+
+html[data-twitter-classic="on"] form[role="search"]:focus-within,
+html[data-twitter-classic="on"] form[role="search"]:focus-within > div,
+html[data-twitter-classic="on"] form[role="search"]:focus-within div:has([data-testid="SearchBox_Search_Input"]) {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 1px var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section),
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section) > div,
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section) :is(.r-kemksi, .r-14lw9ot) {
+  background-color: var(--twitter-soft) !important;
+  border-color: transparent !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section) {
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section) :is(a, [role="link"]) {
+  border-color: var(--twitter-border) !important;
+}
+
+html[data-twitter-classic="on"] [data-testid="sidebarColumn"] :is(aside, section) :is(a, [role="link"]):hover {
+  background-color: #edf1f3 !important;
+}
+
+html[data-twitter-classic="on"] :is([role="menu"], [role="listbox"], [data-testid="sheetDialog"]) {
+  background-color: #ffffff !important;
+  border-color: var(--twitter-border) !important;
+}
+
+@media (max-width: 700px) {
+  html[data-twitter-classic="on"] [data-twitter-classic-home-header] {
+    min-height: 52px !important;
+  }
+}

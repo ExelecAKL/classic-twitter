@@ -1,0 +1,200 @@
+<!doctype html>
+<html data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Classic Twitter v1.3 regression fixture</title>
+    <script>
+      history.replaceState(null, "", "/home");
+
+      (() => {
+        const values = {
+          deElon: true,
+          getBackToX: false,
+          classicDark: false
+        };
+        const listeners = [];
+
+        function select(keys) {
+          if (keys == null) return { ...values };
+          if (typeof keys === "string") return { [keys]: values[keys] };
+          if (Array.isArray(keys)) {
+            return Object.fromEntries(keys.map((key) => [key, values[key]]));
+          }
+          return Object.fromEntries(
+            Object.entries(keys).map(([key, fallback]) => [
+              key,
+              values[key] === undefined ? fallback : values[key]
+            ])
+          );
+        }
+
+        window.chrome = {
+          runtime: {
+            id: "classic-twitter-v13-fixture",
+            getURL(path) {
+              return `/${path.replace(/^\/+/, "")}`;
+            }
+          },
+          storage: {
+            local: {
+              get(keys, callback) {
+                const result = select(keys);
+                if (typeof callback === "function") {
+                  queueMicrotask(() => callback(result));
+                  return undefined;
+                }
+                return Promise.resolve(result);
+              },
+              set(update, callback) {
+                const changes = {};
+                for (const [key, newValue] of Object.entries(update)) {
+                  const oldValue = values[key];
+                  values[key] = newValue;
+                  changes[key] = { oldValue, newValue };
+                }
+                queueMicrotask(() => {
+                  for (const listener of listeners) listener(changes, "local");
+                  if (typeof callback === "function") callback();
+                });
+                return Promise.resolve();
+              }
+            },
+            onChanged: {
+              addListener(listener) {
+                listeners.push(listener);
+              }
+            }
+          }
+        };
+        window.fixtureSettings = values;
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles/twitter-light.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-refinement.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-leak-fixes.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-stable-hooks.css">
+    <link rel="stylesheet" href="/styles/twitter-2019-v12-final.css">
+    <link rel="stylesheet" href="/styles/twitter-v13.css">
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 15px Arial, sans-serif; }
+      #react-root { display: grid; grid-template-columns: 250px 600px 360px; min-height: 760px; }
+      header[role="banner"] { padding: 16px; }
+      nav { display: grid; gap: 8px; }
+      nav a { display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 8px; }
+      nav svg { width: 26px; height: 26px; }
+      [data-testid="primaryColumn"] { border-inline: 1px solid #2f3336; }
+      #feed-shell { min-height: 650px; }
+      #native-tabs-row { display: flex; height: 64px; align-items: center; }
+      #timeline-plus-shell { display: flex; align-self: stretch; padding: 4px; border: 2px solid #2f3336; border-radius: 9999px; background: #cfd9de; box-shadow: 0 0 0 2px #000; }
+      #manage-timelines { position: relative; border: 2px solid #2f3336; border-radius: 9999px; background: #cfd9de; box-shadow: 0 0 0 2px #000; }
+      #manage-timelines::before { content: ""; position: absolute; inset: 4px; border: 1px solid #2f3336; border-radius: 9999px; background: #cfd9de; box-shadow: 0 0 0 1px #000; }
+      [role="tablist"] { display: flex; flex: 1; }
+      [role="tab"] { flex: 1; min-height: 54px; }
+      [role="status"] { min-height: 48px; place-items: center; }
+      [role="status"] button { border-radius: 9999px; padding: 10px 22px; }
+      #home-composer, #reply-composer { padding: 14px; }
+      #home-composer { border-bottom: 2px solid #000; }
+      [data-testid$="RichTextInputContainer"] { min-height: 48px; padding: 10px; }
+      [data-testid="toolBar"] { display: flex; align-items: center; min-height: 42px; }
+      [data-testid="tweetButtonInline"] { min-width: 78px; min-height: 38px; border-radius: 9999px; }
+      article { padding: 16px; border-top: 1px solid #2f3336; }
+      #reply-composer { display: flex; align-items: center; gap: 10px; }
+      #reply-composer [data-testid$="RichTextInputContainer"] { flex: 1; }
+      aside { padding: 12px; }
+      aside section { margin-block: 12px; padding: 16px; border: 1px solid #2f3336; border-radius: 16px; }
+      #fixture-results { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 330px; max-height: 45vh; overflow: auto; padding: 14px; border-radius: 12px; background: #15202b; color: #fff; box-shadow: 0 4px 18px #0006; }
+      #fixture-results[data-status="pass"] { border: 3px solid #17bf63; }
+      #fixture-results[data-status="fail"] { border: 3px solid #e0245e; }
+      #fixture-results ol { margin: 8px 0 0; padding-left: 24px; }
+      #fixture-results .pass { color: #71d99a; }
+      #fixture-results .fail { color: #ff8da7; }
+    </style>
+  </head>
+  <body>
+    <div id="react-root">
+      <header role="banner">
+        <h1><a href="/home" aria-label="X"><svg viewBox="0 0 24 24"><path d="M4 3l16 18M20 3 4 21"></path></svg></a></h1>
+        <nav aria-label="Primary">
+          <a href="/home" aria-current="page"><div class="icon-slot"><svg viewBox="0 0 24 24"><path d="M2 10 12 2l10 8v12H2z"></path></svg></div><span>Home</span></a>
+          <a id="grok-nav" href="/i/grok"><svg><path d="M1 1h22v22H1z"></path></svg><span>Grok</span></a>
+          <a id="premium-nav" href="/i/premium_sign_up"><svg><path d="M1 1h22v22H1z"></path></svg><span>Premium</span></a>
+        </nav>
+      </header>
+
+      <main role="main">
+        <div data-testid="primaryColumn">
+          <button data-testid="app-bar-back" aria-label="Back">
+            <svg viewBox="0 0 24 24"><path fill="#eff3f4" d="m10 4-8 8 8 8 1.5-1.5L6 13h16v-2H6l5.5-5.5z"></path></svg>
+          </button>
+
+          <!-- The whole feed intentionally shares this wrapper with the native tabs. -->
+          <div id="feed-shell">
+            <div id="native-tabs-row">
+              <div id="native-tablist" role="tablist">
+                <button role="tab">For you</button>
+                <button role="tab">Following</button>
+              </div>
+              <div id="timeline-plus-shell">
+                <button id="manage-timelines" aria-label="Manage timelines"><span>+</span></button>
+              </div>
+            </div>
+
+            <div id="new-tweets-status" role="status">
+              <button aria-label="New posts are available. Push the period key.">
+                <span data-testid="pillLabel">posted</span>
+              </button>
+            </div>
+
+            <section id="home-composer" aria-label="Tweet composer">
+              <div data-testid="tweetTextarea_0RichTextInputContainer">
+                <div data-testid="tweetTextarea_0" contenteditable="true" aria-label="Post text">Whatâ€™s happening?</div>
+              </div>
+              <div data-testid="toolBar">
+                <button id="composer-media-control" aria-label="Add photos or video" style="border: 2px solid rgb(47, 51, 54); border-radius: 9999px; background: rgb(22, 24, 28); box-shadow: 0 0 0 2px rgb(0, 0, 0); color: rgb(239, 243, 244)">
+                  <div style="border: 1px solid rgb(47, 51, 54); border-radius: 9999px; background: rgb(22, 24, 28)"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 5h18v14H3zm3 11 4-4 3 3 2-2 3 3z"></path></svg></div>
+                </button>
+                <div id="home-character-counter" role="progressbar" aria-label="Character count" style="display: grid; width: 20px; height: 20px; color: rgb(239, 243, 244); border: 2px solid rgb(83, 100, 113); border-radius: 50%">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2"></circle></svg>
+                </div>
+              </div>
+              <button id="home-tweet-button" data-testid="tweetButtonInline"><span>Post</span></button>
+            </section>
+
+            <article id="notification-item" aria-label="Notification">
+              <div data-testid="socialContext">Recent post from</div>
+              <div data-testid="User-Name">A user</div>
+              <div data-testid="tweetText">A user says Recent post from is a phrase.</div>
+            </article>
+
+            <article id="tweet-item">
+              <h2>Post</h2>
+              <div data-testid="tweetText">The feed must stay visible after its tab strip is hidden.</div>
+              <section id="reply-composer" aria-label="Reply composer">
+                <div data-testid="tweetTextarea_1RichTextInputContainer">
+                  <div data-testid="tweetTextarea_1" contenteditable="true" aria-label="Post your reply">Post your reply</div>
+                </div>
+                <button id="reply-button" data-testid="tweetButtonInline"><span>Reply</span></button>
+              </section>
+            </article>
+          </div>
+        </div>
+      </main>
+
+      <aside data-testid="sidebarColumn">
+        <form role="search"><input data-testid="SearchBox_Search_Input" placeholder="Search"></form>
+        <div id="search-separator" aria-hidden="true" style="width: 100%; height: 2px; border-top: 1px solid rgb(47, 51, 54); background: rgb(47, 51, 54); box-shadow: 0 1px 0 rgb(0, 0, 0)"></div>
+        <div id="premium-shell-outer"><div id="premium-shell-inner"><section id="subscription-card"><h2>Subscribe to Premium</h2><a href="/i/premium_sign_up">Subscribe</a></section></div></div>
+        <section><span id="leaked-white-text" style="color: rgb(239, 243, 244)">This UI text leaked white.</span></section>
+      </aside>
+    </div>
+
+    <section id="fixture-results" aria-live="polite" data-status="running">
+      <strong>v1.3 checks runningâ€¦</strong>
+    </section>
+
+    <script src="/scripts/v13-main.js"></script>
+    <script src="/tests/v13-regression-fixture.js"></script>
+  </body>
+</html>

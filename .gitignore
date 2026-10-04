@@ -1,0 +1,33 @@
+# Signing material: never publish private extension keys.
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Packaged downloads belong in releases, not source commits.
+*.crx
+*.zip
+*.7z
+*.tar
+*.gz
+
+# Local dependencies, portable tools, and test output.
+node_modules/
+.tools/
+playwright-report/
+test-results/
+*.log
+coverage/
+
+# Local credentials and editor/agent state.
+.env
+.env.*
+!.env.example
+.npmrc
+.agents/
+.codex/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
