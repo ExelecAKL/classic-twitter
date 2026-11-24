@@ -603,6 +603,12 @@ html[data-twitter-classic="on"] [role="dialog"]:has(
   color: #ffffff !important;
 }
 
+/* Playback chrome uses white ink over the player's own dark overlays. */
+html[data-twitter-classic="on"] [class~="bg-black"][class~="tabular-nums"]:has(> video)
+  :is([class~="text-white"], [class~="text-on-color"]) {
+  color: #ffffff !important;
+}
+
 /* X currently paints the nested Back path white even when the button inherits
    blue. The explicit marker fixes every nested level without touching media. */
 

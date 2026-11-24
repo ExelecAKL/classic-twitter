@@ -49,7 +49,7 @@ This is a visual customization of X's existing interface—not a replacement soc
 
 ### What's new in 1.3.5
 
-Fixes overlapping text in X's refreshed composer and shows the character ring while typing. X's own counter takes over at the warning threshold. The native translation control keeps its behavior and uses a simple 文/A icon.
+Fixes overlapping text in X's refreshed composer and shows the character ring while typing. X's own counter takes over at the warning threshold. The native translation control uses a simple 文/A icon. Video controls retain their contrast over footage in Light and Dim mode.
 
 ### 1.3.4
 

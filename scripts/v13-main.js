@@ -35,6 +35,7 @@
   ].join(",");
 
   const MEDIA_SELECTOR = [
+    '[class~="bg-black"][class~="tabular-nums"]:has(> video)',
     'article [data-slot="xds-context-menu-trigger"]:has(img, video)',
     '[data-testid="videoPlayer"]',
     '[data-testid="swipe-to-dismiss"]',

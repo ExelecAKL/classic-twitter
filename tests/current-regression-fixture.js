@@ -96,6 +96,13 @@
           <button id="new-explain" data-slot="xds-button" aria-label="Explain this post"><svg data-icon="icon-logo-grok"></svg></button>
           <button id="new-translate" data-slot="xds-button" title="Translate with Grok"><svg data-icon="icon-logo-grok"></svg><span>Show translation</span></button>
           <button id="new-translation-settings" aria-label="Translation settings">⚙</button>
+          <div id="new-video" class="bg-black tabular-nums" style="background-color:black">
+            <video preload="none"></video>
+            <div id="new-video-controls" class="group/controls" style="background-image:linear-gradient(transparent, #000b)">
+              <button id="new-video-mute" class="text-white" aria-label="Unmute" style="color:white">Sound</button>
+              <span id="new-video-time" class="text-on-color" style="color:white;background-color:#000c">00:06 / 01:10</span>
+            </div>
+          </div>
           <button id="new-bookmark">Bookmark</button>
           <button id="new-retweet" data-slot="xds-menu-trigger" aria-label="12 reposts. Repost"></button>
           <p><a href="/i/grok" id="new-feed-link">A link about Grok</a></p>
@@ -196,6 +203,20 @@
       return visible("#new-translate") && visible("#new-translation-settings") && button.textContent === "Show translation" &&
         button.querySelectorAll('[data-twitter-classic-translation-icon]').length === 1 &&
         style(button.querySelector('[data-twitter-classic-translation-original]')).display === "none";
+    });
+    await check("Playback chrome keeps white controls and dark overlays in Light and Dim", async () => {
+      const readable = () => style(find("#new-video")).backgroundColor === "rgb(0, 0, 0)" &&
+        style(find("#new-video-mute")).color === "rgb(255, 255, 255)" &&
+        style(find("#new-video-time")).color === "rgb(255, 255, 255)" &&
+        style(find("#new-video-time")).backgroundColor === "rgba(0, 0, 0, 0.8)" &&
+        style(find("#new-video-controls")).backgroundImage.includes("linear-gradient");
+      const lightMode = readable();
+      await window.fixtureSetOptions({ classicDark: true });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "dim");
+      const dimMode = readable();
+      await window.fixtureSetOptions({ classicDark: false });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "light");
+      return lightMode && dimMode;
     });
     await check("Inline reply hint is restored without rewriting the draft or Reply button", async () => {
       const editor = find("#new-reply-editor");
