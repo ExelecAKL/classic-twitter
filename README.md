@@ -60,7 +60,7 @@ Classic Twitter changes the interface you see, not the platform underneath it. T
 - **Consistent highlights:** one blue-tinted navigation highlight rather than overlapping hover layers.
 - **Messages:** a blue launcher and matching Light or Dim palettes on the full page and in the floating drawer, with native conversations and controls intact.
 - **Signed-out styling:** Twitter artwork and bird branding on X's existing landing page and login dialogs.
-- **Optional De-Elon mode:** hides supported Grok, Premium, subscription, and promotional surfaces. Direct `@grok` prompts disappear from the timeline without a visible placeholder.
+- **Optional De-Elon mode:** hides supported Grok, Premium, subscription, and promotional surfaces. Tweets that tag `@grok` disappear from the timeline without a visible placeholder.
 - **Ad filtering:** hides marked ads, including header badges and “Ad from…” disclosures, without leaving blank rows. It stays on even with De-Elon mode off.
 - **Translation and playback:** a neutral 文/A icon before and after translation, and video controls that stay readable over footage in either theme.
 
@@ -92,6 +92,10 @@ Then use **Load unpacked** and choose the cloned `classic-twitter` folder.
 Classic Twitter runs on `https://x.com/*` and `https://twitter.com/*`. It doesn't change the domain displayed in the address bar.
 
 ## Release history
+
+### What's new in 2.0.0
+
+Switch between Twitter Mode and X Mode with the new power button. The popup has a tactile press and rebound, dotted blue and monochrome ripples, a short synthesized power-on chirp, and a compact Dark mode switch. It respects reduced motion and works without external assets. The update also improves the ad filter, closes feed gaps, restores Twitter-blue Follow buttons and video volume accents, and removes pitch-black patches from Dim profiles.
 
 ### What's new in 1.3.6
 
@@ -125,10 +129,10 @@ Select the bird icon in your browser toolbar to open the popup.
 | Control | What it does | Default |
 | --- | --- | --- |
 | **De-Elon mode** | Hides supported newer X navigation and promotional surfaces, including Grok and Premium prompts. | On |
-| **Classic dark mode** | Uses Twitter's navy Dim palette. Turn it off for the classic light theme. | Off |
-| **Get back to X** | Pauses restoration and ad filtering, and reloads X in its native appearance. Turn it off to restore Classic Twitter. | Off |
+| **Dark mode** | Uses Twitter's navy Dim palette. Turn it off for the classic light theme. | Off |
+| **Power button** | Switches between **Twitter Mode** and **X Mode**. X Mode pauses restoration and ad filtering and reloads X in its native appearance. | Twitter Mode |
 
-Preferences are saved locally in the browser. Appearance switches update the extension's theme; **Get back to X** reloads the page. Refresh another open tab if it hasn't picked up a change. Ad filtering doesn't depend on the De-Elon switch.
+Preferences are saved locally in the browser. Appearance switches update the extension's theme; switching **Twitter Mode / X Mode** reloads the page. Refresh another open tab if it hasn't picked up a change. Ad filtering doesn't depend on the De-Elon switch.
 
 ## Update or remove
 
@@ -144,7 +148,7 @@ Preferences are saved locally in the browser. Appearance switches update the ext
 
 ### Disable or uninstall
 
-Use **Get back to X** for a temporary return to X's appearance. To disable or remove the extension, use your browser's extensions page, then refresh X.
+Press the power button to enter **X Mode** for a temporary return to X's appearance. To disable or remove the extension, use your browser's extensions page, then refresh X.
 
 ## Privacy and permissions
 
@@ -164,7 +168,7 @@ The extension reads the page's interface to apply styling and supported label re
 | Changes do not appear after an update | Reload the extension, then hard-refresh X. |
 | A blank page or old styles remain | Close and reopen the X tab after reloading the extension. |
 | The popup is missing a new switch | Reload the extension itself; refreshing the website is not enough. |
-| X branding is still visible | Make sure **Get back to X** is off. Report the affected page and a screenshot if it persists. |
+| X branding is still visible | Make sure the popup says **Twitter Mode**. Report the affected page and a screenshot if it persists. |
 | Colors or media look wrong | Temporarily disable other X themes, userscripts, or extensions that modify the page. |
 | A labeled ad still appears | Reload to make sure you're on the latest release. If it persists, include a screenshot of the ad label and the page where it appeared in your report. |
 | A future X update breaks a panel | Check for an extension update. X regularly changes its markup and styles. |

@@ -102,6 +102,18 @@
             <div id="new-video-controls" class="group/controls" style="background-image:linear-gradient(transparent, #000b)">
               <button id="new-video-mute" class="text-white" aria-label="Unmute" style="color:white">Sound</button>
               <span id="new-video-time" class="text-on-color" style="color:white;background-color:#000c">00:06 / 01:10</span>
+              <div id="new-volume-popup" role="dialog" aria-label="Volume slider">
+                <div id="new-volume-group" role="group" data-orientation="vertical" class="text-white" style="background:white">
+                  <div data-orientation="vertical">
+                    <div id="new-volume-track" data-orientation="vertical" class="bg-current/30">
+                      <div id="new-volume-fill" data-orientation="vertical" class="bg-current" style="height:37%;background:white"></div>
+                    </div>
+                    <div id="new-volume-thumb" data-orientation="vertical" class="bg-current" style="bottom:37%;background:white">
+                      <input type="range" aria-label="Volume slider" value="37">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <button id="new-bookmark">Bookmark</button>
@@ -121,7 +133,7 @@
           <li><div id="new-organic-linked-text" role="link" data-href="/fixture/status/8"><article><div class="whitespace-pre-wrap" dir="auto" lang="en"><a href="https://example.com/campaign">Ad from example.com</a></div></article></div></li>
           <li id="new-badge-ad-slot" data-index="9" style="min-height:520px"><div id="new-badge-ad" role="link" data-href="/fixture/status/9"><article>
             <div class="@container/post-actions"><div><a href="/fixture">Work tutorial</a></div>
-              <div class="-me-[5px] flex shrink-0 items-center gap-1 whitespace-nowrap"><span id="new-ad-header-badge">Ad</span><button aria-label="More" data-slot="xds-menu-trigger">•••</button></div>
+              <div class="-me-[5px] flex shrink-0 items-center gap-1 whitespace-nowrap"><div><span id="new-ad-header-badge">Ad</span></div><button disabled aria-hidden="true">•••</button></div>
             </div><div class="whitespace-pre-wrap" dir="auto" lang="en">Three models. Three different strengths.</div>
             <span>There’s a new version of this post</span>
           </article></div></li>
@@ -147,7 +159,9 @@
       <div id="new-profile-hover" role="dialog" data-slot="xds-preview-card-popup">
         <img id="new-hover-cover" src="/assets/twitter-login-background.png" alt="Profile cover" width="200" height="52">
         <button id="new-hover-message" aria-label="Message">Message</button>
-        <button id="new-hover-follow">Follow</button>
+        <button id="new-hover-follow" aria-label="Follow @fixture">Follow</button>
+        <button id="legacy-hover-follow" data-testid="123-follow">Follow</button>
+        <button id="new-hover-following" aria-label="Unfollow @another" data-testid="456-unfollow">Following</button>
         <p id="new-hover-bio">Profile Summary</p>
         <button id="new-hover-summary"><svg data-icon="icon-logo-grok"></svg><span>Profile Summary</span></button>
       </div>
@@ -301,6 +315,23 @@
       await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "light");
       return lightMode && dimMode;
     });
+    await check("Video volume retains a neutral track, blue fill and thumb, and white speaker in Light and Dim", async () => {
+      const slider = find("#new-volume-thumb input");
+      const fill = find("#new-volume-fill");
+      const thumb = find("#new-volume-thumb");
+      const styled = () => style(find("#new-volume-popup")).backgroundColor === "rgba(15, 20, 25, 0.86)" &&
+        transparent(style(find("#new-volume-group")).backgroundColor) &&
+        style(find("#new-volume-track")).backgroundColor === "rgba(255, 255, 255, 0.45)" &&
+        blue(style(fill).backgroundColor) && blue(style(thumb).backgroundColor) &&
+        blue(style(thumb).outlineColor) && style(find("#new-video-mute")).color === "rgb(255, 255, 255)";
+      const lightMode = styled() && slider.value === "37" && fill.style.height === "37%" && thumb.style.bottom === "37%";
+      await window.fixtureSetOptions({ classicDark: true });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "dim");
+      const dimMode = styled();
+      await window.fixtureSetOptions({ classicDark: false });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "light");
+      return lightMode && dimMode;
+    });
     await check("Inline reply hint is restored without rewriting the draft or Reply button", async () => {
       const editor = find("#new-reply-editor");
       const restored = editor.matches(":placeholder-shown") && editor.placeholder === "Tweet your reply" &&
@@ -319,6 +350,13 @@
     await check("Hover card stays visible and only its Grok Profile Summary action is hidden", () =>
       !visible("#new-hover-summary") &&
       ["#new-profile-hover", "#new-hover-cover", "#new-hover-message", "#new-hover-follow", "#new-hover-bio"].every(visible));
+    await check("Native Follow buttons turn blue without changing Following or Message", () => {
+      const fill = "rgb(29, 161, 242)";
+      return ["#new-hover-follow", "#legacy-hover-follow"].every((selector) => {
+        const colors = style(find(selector));
+        return colors.backgroundColor === fill && colors.color === "rgb(7, 28, 44)";
+      }) && ["#new-hover-following", "#new-hover-message"].every((selector) => style(find(selector)).backgroundColor !== fill);
+    });
     await check("Only the core Home tabs show unless an extra timeline is active", () => {
       const extra = find('[role="tab"]:not([data-pinned-timeline])');
       const hasCoreTabs = ["for-you", "following"].every((id) => visible(`[data-pinned-timeline="${id}"]`));
@@ -328,10 +366,10 @@
       extra.setAttribute("aria-selected", "false");
       return hasCoreTabs && hiddenByDefault && visibleWhileActive;
     });
-    await check("A direct Grok prompt leaves no visible row while mentions and quotes stay visible", () => {
+    await check("Direct and mid-tweet Grok tags leave no visible row while quotes stay visible", () => {
       const slot = find("#new-prompt-slot");
       return !visible("#new-prompt") && slot.getBoundingClientRect().height === 1 &&
-        style(slot).visibility === "hidden" && !slot.querySelector("button") && visible("#new-mention") && visible("#new-quote") &&
+        style(slot).visibility === "hidden" && !slot.querySelector("button") && !visible("#new-mention") && visible("#new-quote") &&
         find("#new-mention a").textContent === "@grok";
     });
     await check("The virtualizer remeasures already hidden rows and clears the shim on recycled posts", async () => {
@@ -365,6 +403,50 @@
         timeline.remove();
       }
     });
+    for (const wrapped of [false, true]) {
+      await check(wrapped ? "A wrapped conversation ad cannot leave its stale 400px gap"
+        : "A stronger browser ad rule cannot leave its stale 400px gap", async () => {
+      const timeline = document.createElement("div");
+      timeline.id = "urt-tracked-test";
+      timeline.innerHTML = `
+        <style>#urt-tracked-test > ul > li:has([target="_blank"][href*="?twclid="]) { display: none !important; }</style>
+        <ul style="position:relative">
+          <li data-index="30" style="position:absolute;transform:translateY(0px);min-height:400px">
+            ${wrapped ? '<div class="flex flex-col">' : ""}
+            <div role="link" data-href="/fixture/status/30"><article>
+              <div data-testid="tweetText"><a id="masked-click" target="_blank" href="https://example.com/?twclid=old-ad&amp;campaign=keep">Ad destination</a></div>
+            </article></div>
+            ${wrapped ? "</div>" : ""}
+          </li>
+          <li data-index="31" style="position:absolute;transform:translateY(400px)"><div role="link" data-href="/fixture/status/31"><article>Next tweet</article></div></li>
+        </ul>
+        <article><div data-testid="tweetText"><a id="untouched-click" target="_blank" href="https://example.com/?twclid=untouched">Unfiltered post link</a></div></article>`;
+      find("main").append(timeline);
+      const hidden = timeline.querySelector('[data-index="30"]');
+      const next = timeline.querySelector('[data-index="31"]');
+      const link = find("#masked-click");
+      const offset = () => next.getBoundingClientRect().top - hidden.getBoundingClientRect().top;
+      const observer = new ResizeObserver(() => {
+        const h = hidden.getBoundingClientRect().height;
+        if (h > 0 && next.style.transform !== `translateY(${h}px)`) next.style.transform = `translateY(${h}px)`;
+      });
+      observer.observe(hidden);
+      try {
+        await waitFor(() => offset() === 1 && style(hidden).visibility === "hidden");
+        const trackerRemoved = link.getAttribute("href") === "https://example.com/?campaign=keep" &&
+          find("#untouched-click").getAttribute("href") === "https://example.com/?twclid=untouched";
+        link.setAttribute("href", "https://example.com/?twclid=refreshed-ad&campaign=keep");
+        await waitFor(() => !link.getAttribute("href").includes("twclid") && offset() === 1);
+        link.closest("[data-href]").setAttribute("data-href", "/fixture/status/34");
+        hidden.style.minHeight = "100px";
+        await waitFor(() => offset() === 100 && style(hidden).visibility === "visible");
+        return trackerRemoved && !hidden.hasAttribute("data-twitter-classic-hidden-feed-slot");
+      } finally {
+        observer.disconnect();
+        timeline.remove();
+      }
+      });
+    }
     await check("Ad filtering preserves organic posts, quotes, and recycled feed rows", async () => {
       const slot = find("#new-ad-slot");
       const collapsed = !visible("#new-paid-post") && slot.getBoundingClientRect().height === 1;
@@ -386,7 +468,7 @@
       await waitFor(() => !visible("#new-ad-disclosure-post"));
       return hidden && visible("#new-organic-linked-text");
     });
-    await check("Header badges and placement metadata hide ads without hiding a name, tweet body, or quote", async () => {
+    await check("Header badges hide ads even with an unlabeled More button, while organic content stays visible", async () => {
       const slot = find("#new-badge-ad-slot");
       const filtered = !visible("#new-badge-ad") && slot.getBoundingClientRect().height === 1 &&
         !visible("#legacy-ad-post") && !visible("#legacy-tracked-ad article");
@@ -423,19 +505,88 @@
     await waitFor(() => document.documentElement.dataset.twitterClassicDeElon === "on");
   }
 
+  async function checkTweetDetailHeader() {
+    const fixture = document.createElement("main");
+    fixture.innerHTML = `
+      <div id="tweet-detail-bar" class="bg-primary/80 sticky" style="background-color:#000">
+        <div class="mobile"><button aria-label="Back">Back</button><div><h2>Post</h2></div></div>
+        <div class="desktop"><button aria-label="Back">Back</button><div><h2>Post</h2></div></div>
+      </div>
+      <article><h2 id="tweet-detail-user-heading">Post</h2><div data-testid="tweetText">Post</div></article>`;
+    document.body.append(fixture);
+    history.pushState(null, "", "/fixture/status/30");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    const bar = fixture.querySelector("#tweet-detail-bar");
+    await window.fixtureSetOptions({ classicDark: true });
+    await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "dim" &&
+      bar.hasAttribute("data-twitter-classic-tweet-detail-header"));
+    await check("Both Tweet detail headings say Tweet over Dim navy without rewriting the post", () =>
+      [...bar.querySelectorAll("h2")].every((title) => title.textContent === "Tweet") &&
+      style(bar).backgroundColor === "rgb(21, 32, 43)" &&
+      fixture.querySelector("#tweet-detail-user-heading").textContent === "Post" &&
+      fixture.querySelector('[data-testid="tweetText"]').textContent === "Post");
+    fixture.remove();
+    await window.fixtureSetOptions({ classicDark: false });
+    await goHome();
+  }
+
+  async function checkDimPageHeaders() {
+    const fixture = document.createElement("main");
+    const tabs = (pair) => `<div role="tablist">${pair.map((name, i) =>
+      `<button role="tab" aria-selected="${i === 0}">${name}<span data-tab-underline style="background:#fff"></span></button>`).join("")}</div>`;
+    fixture.innerHTML = `
+      <section id="dim-explore">
+        <div class="bg-primary/80 sticky" style="background:#000"><form role="search"><input aria-label="Search query"></form></div>
+        <div class="bg-primary/80 sticky" style="background:#000"><div>${tabs(["Explore", "Trending"])}</div></div>
+      </section>
+      ${["Notifications", "History"].map((page) => `
+        <header data-page-header aria-label="${page}">
+          <div class="bg-primary/80" style="background:#000"></div>
+          <h2>${page}</h2>${tabs(page === "History" ? ["Bookmarks", "Likes"] : ["All", "Mentions"])}
+        </header>`).join("")}
+      <div class="bg-black tabular-nums" id="dim-page-video" style="background:#000"><video preload="none"></video></div>`;
+    document.body.append(fixture);
+    await window.fixtureSetOptions({ classicDark: true });
+    await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "dim");
+    const navy = "rgb(21, 32, 43)";
+    const surfacesAreNavy = (scope) => [...scope.querySelectorAll('[class~="bg-primary/80"]')]
+      .every((el) => style(el).backgroundColor === navy);
+    const tabsAreBlue = (scope) => blue(style(scope.querySelector('[aria-selected="true"] [data-tab-underline]')).backgroundColor);
+    await check("Explore keeps its native search and tabs on Dim navy with a blue underline", () => {
+      const explore = fixture.querySelector("#dim-explore");
+      return surfacesAreNavy(explore) && tabsAreBlue(explore) && !!explore.querySelector("form input");
+    });
+    for (const page of ["Notifications", "History"]) {
+      await check(`${page} uses a Dim navy header and a blue native tab underline`, () => {
+        const header = fixture.querySelector(`header[aria-label="${page}"]`);
+        return surfacesAreNavy(header) && tabsAreBlue(header) && header.querySelector("h2").textContent === page;
+      });
+    }
+    await check("Dim page chrome does not recolor the black video surface", () =>
+      style(fixture.querySelector("#dim-page-video")).backgroundColor === "rgb(0, 0, 0)");
+    fixture.remove();
+    await window.fixtureSetOptions({ classicDark: false });
+    await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "light");
+  }
+
   async function checkModernProfile() {
     const fixture = document.createElement("main");
     fixture.innerHTML = `
       <div class="profile-content">
+        <div id="profile-sticky-header" class="bg-primary/80 sticky" style="background-color:#000"><button aria-label="Back">Back</button></div>
         <div id="verification-banner-wrap"><div data-slot="xds-callout" role="status"><p>You aren’t verified yet</p><a href="/i/premium_sign_up">Get verified</a><button aria-label="Dismiss">×</button></div></div>
         <span id="profile-verified-badge" role="img" aria-label="Verified account">✓</span>
-        <div role="tablist">
+        <div id="profile-sticky-tabs" class="bg-primary/80 sticky" style="background-color:#000"><div><div role="tablist">
           <button role="tab" aria-haspopup="menu" aria-selected="true">Posts</button>
           <a role="tab" href="/fixture/with_replies">Replies</a>
           <a role="tab" href="/fixture/reposts" aria-selected="false">Reposts</a>
           <a role="tab" href="/fixture/media">Media</a>
           <a role="tab" href="/fixture/articles" aria-selected="false">Articles</a>
-        </div>
+        </div></div></div>
+        <aside><style>#profile-search::before { content:""; background-color:#000; mask-image:linear-gradient(#000,transparent); }</style>
+          <div id="profile-search" class="before:bg-primary sticky"><div><form role="search"><input aria-label="Search query"></form></div></div>
+        </aside>
+        <div id="profile-media-black" class="bg-black tabular-nums" style="background-color:#000"><video preload="none"></video></div>
       </div>
     `;
     document.body.append(fixture);
@@ -458,6 +609,20 @@
     await check("De-Elon collapses the verification promo wrapper and preserves the badge and profile", () =>
       !visible(fixture.querySelector("#verification-banner-wrap")) &&
       visible(fixture.querySelector("#profile-verified-badge")) && visible(list));
+    await check("Dim colors the sticky profile bars and search scrim navy without recoloring video", async () => {
+      const find = (selector) => fixture.querySelector(selector);
+      await window.fixtureSetOptions({ classicDark: true });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "dim");
+      const navy = "rgb(21, 32, 43)";
+      const scrim = style(find("#profile-search"), "::before");
+      const correct = ["#profile-sticky-header", "#profile-sticky-tabs"].every((selector) =>
+        style(find(selector)).backgroundColor === navy) &&
+        scrim.backgroundColor === navy && scrim.maskImage.includes("linear-gradient") &&
+        style(find("#profile-media-black")).backgroundColor === "rgb(0, 0, 0)";
+      await window.fixtureSetOptions({ classicDark: false });
+      await waitFor(() => document.documentElement.dataset.twitterClassicTheme === "light");
+      return correct;
+    });
     await window.fixtureSetOptions({ deElon: false });
     await waitFor(() => document.documentElement.dataset.twitterClassicDeElon === "off");
     await check("Disabling De-Elon restores the additional profile tabs and verification promo", () =>
@@ -613,6 +778,8 @@
       query('#home-main [role="tablist"]').getAttribute("data-twitter-classic-native-tabs") === "on");
     await checkModernHome();
     await checkModernProfile();
+    await checkTweetDetailHeader();
+    await checkDimPageHeaders();
     const notifications = document.createElement("main");
     notifications.innerHTML = `
       <div role="link" aria-label="New post notifications for Fixture User"><span>New post notifications for <b>Fixture User</b> and 2 others</span> · 2h</div>

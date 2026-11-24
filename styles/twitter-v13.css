@@ -609,6 +609,47 @@ html[data-twitter-classic="on"] [class~="bg-black"][class~="tabular-nums"]:has(>
   color: #ffffff !important;
 }
 
+/* Keep the Follow CTA distinct from Following and the adjacent Message button. */
+html[data-twitter-classic="on"] :is(button, [role="button"]):is(
+  [data-testid$="-follow"],
+  [aria-label="Follow" i],
+  [aria-label^="Follow @" i]
+):not([aria-pressed="true"]) {
+  background-color: var(--twitter-blue) !important;
+  border-color: var(--twitter-blue) !important;
+  color: #071c2c !important;
+}
+
+html[data-twitter-classic="on"] :is(button, [role="button"]):is(
+  [data-testid$="-follow"],
+  [aria-label="Follow" i],
+  [aria-label^="Follow @" i]
+):not([aria-pressed="true"]):is(:hover, :focus-visible) {
+  background-color: var(--twitter-blue-hover) !important;
+  border-color: var(--twitter-blue-hover) !important;
+}
+
+/* The volume popover is a dialog inside the player, not a page dialog. */
+html[data-twitter-classic="on"] [role="dialog"][aria-label="Volume slider" i] {
+  background-color: rgba(15, 20, 25, 0.86) !important;
+}
+
+html[data-twitter-classic="on"] [role="dialog"][aria-label="Volume slider" i]
+  [role="group"][data-orientation="vertical"] {
+  background-color: transparent !important;
+}
+
+html[data-twitter-classic="on"] [role="dialog"][aria-label="Volume slider" i]
+  [data-orientation="vertical"] [class~="bg-current/30"] {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+}
+
+html[data-twitter-classic="on"] [role="dialog"][aria-label="Volume slider" i]
+  [data-orientation="vertical"] [class~="bg-current"] {
+  background-color: var(--twitter-blue) !important;
+  outline-color: var(--twitter-blue) !important;
+}
+
 /* X currently paints the nested Back path white even when the button inherits
    blue. The explicit marker fixes every nested level without touching media. */
 
@@ -1098,6 +1139,25 @@ html[data-twitter-classic="on"] [data-twitter-classic-native-landing-footer="on"
 }
 
 /* Latest native-layout polish ------------------------------------------- */
+
+/* Keep X's native sticky glass and search mask, but tint them with Dim
+   instead of the black base token used by the site's dark theme. */
+html[data-twitter-classic="on"][data-twitter-classic-theme="dim"][data-twitter-classic-page="status"]
+  [data-twitter-classic-tweet-detail-header="on"],
+html[data-twitter-classic="on"][data-twitter-classic-theme="dim"]
+  main header[data-page-header] > [class~="bg-primary/80"],
+html[data-twitter-classic="on"][data-twitter-classic-theme="dim"]
+  main [class~="bg-primary/80"][class~="sticky"]:is(
+    :has(> [data-twitter-classic-back="on"]),
+    :has([role="tablist"], form[role="search"], [data-twitter-classic-search-input], input[aria-label="Search query"])
+  ) {
+  background-color: var(--twitter-page) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-theme="dim"]
+  aside [class~="before:bg-primary"][class~="sticky"]:has(form[role="search"])::before {
+  background-color: var(--twitter-page) !important;
+}
 
 html[data-twitter-classic="on"] {
   --twitter-native-font: TwitterChirp, -apple-system, BlinkMacSystemFont,
@@ -1714,6 +1774,10 @@ html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinne
 html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinned-timeline]:focus-visible {
   outline: 2px solid var(--twitter-blue) !important;
   outline-offset: -3px !important;
+}
+
+html[data-twitter-classic="on"] main [role="tablist"] [data-tab-underline] {
+  background-color: var(--twitter-blue) !important;
 }
 
 html[data-twitter-classic="on"] :is([data-twitter-classic-native-tabs], [data-twitter-classic-profile-tabs]) [data-tab-underline] {

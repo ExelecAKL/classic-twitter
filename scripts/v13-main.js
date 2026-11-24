@@ -25,6 +25,9 @@
   const QUOTED_POST_SELECTOR = '[data-slot="embedded-tweet-frame"], [data-testid="quoteTweet"]';
   const VIRTUAL_FEED_SLOT_SELECTOR = ':is(main, [role="main"]) :is(ul > li[data-index], [data-testid="cellInnerDiv"][style*="translateY("])';
   const MEASURED_HIDDEN_SLOT = "data-twitter-classic-hidden-feed-slot";
+  const TWEET_DETAIL_BAR_SELECTOR = ':is(main, [role="main"]) :is(header[data-page-header], [class~="bg-primary/80"][class~="sticky"], [data-testid="app-bar"]):has([aria-label="Back"], [data-testid="app-bar-back"])';
+  const BROWSER_AD_SLOT_SELECTOR = '[id^="urt"] > ul > li[data-index]';
+  const AD_CLICK_TRACKER_SELECTOR = 'a[target="_blank"][href*="?twclid="]';
   const PROTECTED_CONTENT_SELECTOR = [
     POST_TEXT_SELECTOR,
     '[data-testid="User-Name"]',
@@ -69,6 +72,7 @@
   const GROK_TRANSLATION_ICON = 'svg:is([data-icon*="grok" i], :has(use[href*="grok" i], path[d^="m9.27 15.28 7.98-5.92"]))';
   const AD_DISCLOSURE_TEXT = /^Ad from (?:[a-z\d-]+\.)+[a-z\d-]+$/i;
   const AD_BADGE_TEXT = /^(?:Ad|Promoted|Sponsored)$/i;
+  const POST_HEADER_SELECTOR = '[class~="@container/post-actions"]';
   const POST_MENU_SELECTOR = '[data-testid="caret"], :is(button, [role="button"])[aria-label="More" i]';
   const EXCLUDED_AD_LABEL_SELECTOR = `${QUOTED_POST_SELECTOR}, ${POST_TEXT_SELECTOR}, [data-testid="User-Name"], [data-testid="UserDescription"]`;
 
@@ -195,6 +199,7 @@
   let initialized = false;
   const chatRoots = new Map();
   const grokPrompts = new Map();
+  const browserHiddenAdSlots = new WeakMap();
   let chatRetryTimer = 0;
   let chatRetryCount = 0;
 
@@ -420,6 +425,19 @@
     const targets = new Set();
     addMatches(root, LABEL_TARGET_SELECTOR, targets);
     targets.forEach(rewriteLabelTarget);
+  }
+
+  function restoreTweetDetailHeader(root) {
+    if (pageKind() !== "status") return;
+    const bars = new Set();
+    addMatches(root, TWEET_DETAIL_BAR_SELECTOR, bars);
+    for (const bar of bars) {
+      for (const title of bar.querySelectorAll('h1, h2, [role="heading"]')) {
+        if (!/^(Post|Tweet)$/.test(title.textContent.trim()) || !isSafeLabelTarget(title)) continue;
+        rewriteLabelTarget(title);
+        bar.setAttribute("data-twitter-classic-tweet-detail-header", "on");
+      }
+    }
   }
 
   function restoreProfileTabs(root) {
@@ -1338,19 +1356,37 @@
     grokPrompts.delete(row);
   }
 
-  function hasPaidPostBadge(article) {
-    for (const menu of article.querySelectorAll(POST_MENU_SELECTOR)) {
-      if (menu.closest(EXCLUDED_AD_LABEL_SELECTOR) || menu.closest("article") !== article) continue;
+  function hasPaidPostBadge(post) {
+    const outsideContent = (element) => !element.closest(EXCLUDED_AD_LABEL_SELECTOR) &&
+      (post.matches("article") ? element.closest("article") === post : !element.closest("article"));
+    const matchesBadge = (badge) => AD_BADGE_TEXT.test((badge.getAttribute("aria-label") || badge.textContent).trim());
+    const interactive = 'a[href], button, [role="link"], [role="button"]';
+
+    // The modern header owns the ad label even if More is disabled, rendered
+    // as an icon only, or missing. Only its non-author controls can carry it.
+    for (const header of post.querySelectorAll(POST_HEADER_SELECTOR)) {
+      if (!outsideContent(header)) continue;
+      for (const badge of header.querySelectorAll('span, div, [aria-label]')) {
+        if (!outsideContent(badge)) continue;
+        const control = badge.closest(interactive);
+        if (control && header.contains(control)) continue;
+        if (badge.querySelector(`${interactive}, ${EXCLUDED_AD_LABEL_SELECTOR}`)) continue;
+        if (matchesBadge(badge)) return true;
+      }
+    }
+
+    for (const menu of post.querySelectorAll(POST_MENU_SELECTOR)) {
+      if (!outsideContent(menu)) continue;
       // The visible badge is next to the menu, not part of the author's
       // name or the tweet text. Legacy layouts may wrap the menu once.
       for (let branch = menu, depth = 0; depth < 2; depth += 1, branch = branch.parentElement) {
         const group = branch.parentElement;
-        if (!group || group === article) break;
+        if (!group || group === post) break;
         for (const badge of group.children) {
           if (badge === branch || !badge.matches("span, div, [aria-label]")) continue;
           if (badge.closest(EXCLUDED_AD_LABEL_SELECTOR) ||
               badge.querySelector(`a, button, [role="link"], [role="button"], ${EXCLUDED_AD_LABEL_SELECTOR}`)) continue;
-          if (AD_BADGE_TEXT.test((badge.getAttribute("aria-label") || badge.textContent).trim())) return true;
+          if (matchesBadge(badge)) return true;
         }
       }
     }
@@ -1368,8 +1404,9 @@
     }
     for (const row of rows) {
       const article = row.matches("article") ? row : row.querySelector("article");
-      const paid = article && !article.closest(QUOTED_POST_SELECTOR) && (
-        article.closest('[data-testid="placementTracking"]') || hasPaidPostBadge(article) ||
+      const surface = article && !article.closest(QUOTED_POST_SELECTOR) ? article : row.matches(POST_ROW_SELECTOR) ? row : null;
+      const paid = surface && (
+        surface.closest('[data-testid="placementTracking"]') || hasPaidPostBadge(surface) ||
         [...row.querySelectorAll('a[href], [aria-label^="Ad from " i], [data-testid="promotedIndicator"], [data-testid="placementTracking"]')]
           .some((label) => {
             if (label.closest(EXCLUDED_AD_LABEL_SELECTOR)) return false;
@@ -1393,8 +1430,8 @@
       const existing = grokPrompts.get(row);
       const path = row.getAttribute("data-href") || article.querySelector('a[href*="/status/"]:has(time)')?.getAttribute("href");
       const isOpenTweet = pageKind() === "status" && (!path || path.split("?")[0] === location.pathname);
-      const directPrompt = /^(?:(?:hey|hi|yo)\s+)?@grok(?=$|[\s,.:!?])/i.test(body.textContent.trim());
-      if (isOpenTweet || !directPrompt || row.closest('[data-twitter-classic-feed-ad]')) {
+      const tagsGrok = /(?:^|[^\p{L}\p{N}_@])@grok(?=$|[^\p{L}\p{N}_])/iu.test(body.textContent);
+      if (isOpenTweet || !tagsGrok || row.closest('[data-twitter-classic-feed-ad]')) {
         if (existing === body) clearGrokPrompt(row);
         continue;
       }
@@ -1414,22 +1451,73 @@
     return false;
   }
 
+  function singleVirtualPost(slot) {
+    // Home has a direct row; conversation entries may add a flex wrapper.
+    for (let child = slot.firstElementChild; child && !child.nextElementSibling; child = child.firstElementChild) {
+      if (child.matches(POST_ROW_SELECTOR)) return child;
+    }
+    return null;
+  }
+
+  function browserHiddenAdState(slot) {
+    const saved = browserHiddenAdSlots.get(slot);
+    if (!saved) return null;
+    if (singleVirtualPost(slot) === saved.row &&
+        saved.row.getAttribute("data-href") === saved.path) {
+      for (const [link, href] of saved.links) {
+        if (saved.row.contains(link) && link.getAttribute("href") === href) return saved;
+      }
+    }
+    browserHiddenAdSlots.delete(slot);
+    return null;
+  }
+
+  function keepBrowserFilteredAdMeasurable(slot) {
+    const row = singleVirtualPost(slot);
+    if (!row) return;
+    const links = browserHiddenAdState(slot)?.links || new Map();
+    for (const link of row.querySelectorAll(AD_CLICK_TRACKER_SELECTOR)) {
+      let url;
+      try {
+        url = new URL(link.getAttribute("href"), location.href);
+      } catch {
+        continue;
+      }
+      if (!/^https?:$/.test(url.protocol) || !url.searchParams.has("twclid")) continue;
+      // The browser's cosmetic rule wins over author CSS and makes this
+      // already-hidden ad unmeasurable. Keep it hidden with our own slot
+      // marker, then remove just its X click-tracking query parameter.
+      url.searchParams.delete("twclid");
+      links.set(link, url.href);
+      link.setAttribute("href", url.href);
+    }
+    if (links.size) browserHiddenAdSlots.set(slot, { row, path: row.getAttribute("data-href"), links });
+  }
+
   function reconcileVirtualFeedSlots() {
     const checkNativeVisibility = [];
     for (const slot of document.querySelectorAll(`${VIRTUAL_FEED_SLOT_SELECTOR}, [${MEASURED_HIDDEN_SLOT}]`)) {
       if (!slot.matches(VIRTUAL_FEED_SLOT_SELECTOR)) {
         slot.removeAttribute(MEASURED_HIDDEN_SLOT);
-      } else if (containsOnlyHiddenPost(slot)) {
+        browserHiddenAdSlots.delete(slot);
+        continue;
+      }
+      const hasAdTracker = slot.matches(BROWSER_AD_SLOT_SELECTOR) && Boolean(slot.querySelector(AD_CLICK_TRACKER_SELECTOR));
+      if (containsOnlyHiddenPost(slot) || browserHiddenAdState(slot)) {
         slot.toggleAttribute(MEASURED_HIDDEN_SLOT, true);
       } else {
         // Sample the native display without our shim so a recycled row (or a
         // row no longer hidden by another stylesheet) can become visible.
         slot.removeAttribute(MEASURED_HIDDEN_SLOT);
-        if (options.deElon && slot.style.position === "absolute") checkNativeVisibility.push(slot);
+        if (!hasAdTracker && !(options.deElon && slot.style.position === "absolute")) continue;
       }
+      if (hasAdTracker || !slot.hasAttribute(MEASURED_HIDDEN_SLOT)) checkNativeVisibility.push({ slot, hasAdTracker });
     }
-    const hidden = checkNativeVisibility.filter((slot) => getComputedStyle(slot).display === "none");
-    for (const slot of hidden) slot.setAttribute(MEASURED_HIDDEN_SLOT, "");
+    const hidden = checkNativeVisibility.filter(({ slot }) => getComputedStyle(slot).display === "none");
+    for (const { slot, hasAdTracker } of hidden) {
+      slot.setAttribute(MEASURED_HIDDEN_SLOT, "");
+      if (hasAdTracker) keepBrowserFilteredAdMeasurable(slot);
+    }
   }
 
   function parseColor(value) {
@@ -1869,6 +1957,7 @@
       return;
     }
     restoreLabels(normalized);
+    restoreTweetDetailHeader(normalized);
     restoreProfileTabs(normalized);
     rewriteNotificationPhrases(normalized);
     preserveNewTweetsPill(normalized);
