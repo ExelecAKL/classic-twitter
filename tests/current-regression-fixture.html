@@ -175,7 +175,7 @@
         <section id="trend-card" data-testid="trend"><h2>What’s happening</h2><span>Trending topic</span></section>
         <div id="menu-row" role="menuitem">Settings and privacy</div>
       </aside>
-      <main id="chat-main" role="main"><div id="chat-shadow-host" data-testid="xchatEmbedRoute"></div><div id="chat-overlays-host" data-testid="xchatEmbedOverlays"></div></main>
+      <main id="chat-main" role="main"><div id="chat-shadow-host" class="[--dm-bottom-inset:0px]"></div></main>
       <template id="chat-template">
         <style>
           :host { --x-bg-primary: #000; --x-bg-secondary: #131313; --x-fg-primary: #eff3f4; --x-fg-secondary: #71767b; --x-border-primary: #2f3336; --x-color-accent: #1d9bf0; display: block; }
@@ -221,15 +221,21 @@
         </div>
       </template>
     </div>
+    <div id="chat-overlays-host"></div>
     <div id="current-results" aria-live="polite" style="position: fixed; right: 8px; bottom: 8px; z-index: 999999; max-width: 470px; max-height: 360px; overflow: auto; padding: 12px; background: white; color: black; border: 1px solid #cfd9de">Current UI checks running…</div>
     <script>
       window.fixtureMountChat = () => {
         const host = document.getElementById("chat-shadow-host");
         const shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
-        shadow.replaceChildren(document.getElementById("chat-template").content.cloneNode(true));
+        const route = document.createElement("div");
+        route.dataset.xchatRoot = "route";
+        route.dataset.theme = "dark";
+        route.style.cssText = "--x-bg-primary: #000; --x-fg-primary: #fff; background: var(--x-bg-primary); color: var(--x-fg-primary)";
+        route.append(document.getElementById("chat-template").content.cloneNode(true));
+        shadow.replaceChildren(route);
         const overlaysHost = document.getElementById("chat-overlays-host");
         const overlayShadow = overlaysHost.shadowRoot || overlaysHost.attachShadow({ mode: "open" });
-        overlayShadow.innerHTML = '<style>:host { --x-bg-primary: #000; --x-fg-primary: #eff3f4; } #shadow-dialog { padding: 12px; background: var(--x-bg-primary); color: var(--x-fg-primary); }</style><div id="shadow-dialog" role="dialog" aria-label="Chat menu">New conversation</div>';
+        overlayShadow.innerHTML = '<style>[data-xchat-root] { --x-bg-primary: #000; --x-fg-primary: #eff3f4; } #shadow-dialog { padding: 12px; background: var(--x-bg-primary); color: var(--x-fg-primary); }</style><div data-xchat-root="overlays" data-theme="dark"><div id="shadow-dialog" role="dialog" aria-label="Chat menu">New conversation</div></div>';
       };
       window.fixtureMountChat();
     </script>

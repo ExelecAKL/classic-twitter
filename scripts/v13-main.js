@@ -20,8 +20,10 @@
     timelinePlusShell: "data-twitter-classic-timeline-plus-shell"
   });
 
+  const POST_TEXT_SELECTOR = '[data-testid="tweetText"], article div[dir][lang][class*="whitespace-pre-wrap"]';
+  const POST_ROW_SELECTOR = '[role="link"][data-href*="/status/"]';
   const PROTECTED_CONTENT_SELECTOR = [
-    '[data-testid="tweetText"]',
+    POST_TEXT_SELECTOR,
     '[data-testid="User-Name"]',
     '[data-testid="UserDescription"]',
     '[data-testid="Tweet-User-Avatar"]',
@@ -33,6 +35,7 @@
   ].join(",");
 
   const MEDIA_SELECTOR = [
+    'article [data-slot="xds-context-menu-trigger"]:has(img, video)',
     '[data-testid="videoPlayer"]',
     '[data-testid="swipe-to-dismiss"]',
     '[data-testid="tweetPhoto"]',
@@ -54,11 +57,16 @@
     '[data-testid*="characterCount" i]',
     '[aria-label*="character count" i]'
   ].join(",");
+  const draftCharacters = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
+  const PRIMARY_NAV = 'nav[aria-label="Primary"]';
+  const MODERN_COMPOSER_TOOLBAR = '[data-truncated-list]:has([aria-label="Add media"], [data-icon="icon-photo"], use[href="#icon-photo"])';
+  const MODERN_RETWEET = 'article button[data-slot="xds-menu-trigger"][aria-label*="repost" i]';
 
   const OBSERVED_ATTRIBUTES = [
     "aria-label", "aria-description", "aria-current", "aria-selected",
     "aria-describedby", "aria-valuenow", "aria-valuemax", "aria-valuemin",
-    "title", "placeholder", "data-placeholder", "href", "data-theme",
+    "title", "placeholder", "data-placeholder", "href", "data-href", "data-theme",
     "class", "style", "stroke", "stroke-dasharray", "stroke-dashoffset"
   ];
 
@@ -77,9 +85,15 @@
     '[data-testid="socialContext"]',
     '[data-testid="trend"]',
     '[data-testid="dm-inbox-title"]',
+    '[data-twitter-classic-modern-submit]',
+    '[data-twitter-classic-modern-compose]',
+    '[data-twitter-classic-modern-toolbar] button',
+    `${PRIMARY_NAV} > a`,
+    '[data-slot="xds-dock-launcher"][aria-label="Chat"]',
+    MODERN_RETWEET,
     'header[role="banner"] nav a',
     "input[placeholder]",
-    "textarea[placeholder]"
+    'textarea:is([placeholder], [data-placeholder], [aria-label="Post your reply"])'
   ].join(",");
 
   const SAFE_ARTICLE_CONTROL_SELECTOR = [
@@ -88,7 +102,8 @@
     '[data-testid="unretweet"]',
     '[data-testid="socialContext"]',
     '[data-testid="tweetButton"]',
-    '[data-testid="tweetButtonInline"]'
+    '[data-testid="tweetButtonInline"]',
+    MODERN_RETWEET
   ].join(",");
 
   const EXACT_LABELS = new Map([
@@ -169,6 +184,7 @@
   let readyTimer = 0;
   let initialized = false;
   const chatRoots = new Map();
+  const grokPrompts = new Map();
   let chatRetryTimer = 0;
   let chatRetryCount = 0;
 
@@ -257,7 +273,7 @@
     const shellExists = Boolean(
       root.getAttribute("data-twitter-classic-landing") === "native" ||
         document.querySelector(
-          'header[role="banner"], [data-testid="primaryColumn"], [data-twitter-classic-native-landing="on"]'
+          'header[role="banner"], main header[data-page-header], [data-testid="primaryColumn"], [data-twitter-classic-native-landing="on"]'
         )
     );
     if (!force && !shellExists) {
@@ -313,9 +329,11 @@
   }
 
   function transformForTarget(value, target) {
+    if (target.hasAttribute("data-twitter-classic-profile-replies")) {
+      return value.replace(/^(\s*)Replies(\s*)$/, "$1Tweets & replies$2");
+    }
     if (
-      target.matches('[data-testid="socialContext"], [data-testid="retweet"], [data-testid="unretweet"]') ||
-      target.closest('[data-testid="socialContext"], [data-testid="retweet"], [data-testid="unretweet"]')
+      target.closest(`[data-testid="socialContext"], [data-testid="retweet"], [data-testid="unretweet"], ${MODERN_RETWEET}`)
     ) {
       return replaceRepostTerms(value);
     }
@@ -329,12 +347,23 @@
     if (target.closest(PROTECTED_CONTENT_SELECTOR)) {
       return false;
     }
-    const article = target.closest('article[data-testid="tweet"]');
+    const article = target.closest('article');
     return !article || Boolean(target.closest(SAFE_ARTICLE_CONTROL_SELECTOR));
   }
 
+  function restoreReplyHintAttributes(editor) {
+    for (const attribute of ["placeholder", "data-placeholder", "aria-label"]) {
+      const current = editor.getAttribute(attribute);
+      if (current?.trim() === "Post your reply") {
+        editor.setAttribute(attribute, replaceExactLabel(current));
+      }
+    }
+  }
+
   function rewriteLabelTarget(target) {
-    if (!(target instanceof Element) || !isSafeLabelTarget(target)) {
+    if (!(target instanceof Element)) return;
+    if (target.matches("textarea")) restoreReplyHintAttributes(target);
+    if (!isSafeLabelTarget(target)) {
       return;
     }
 
@@ -383,6 +412,32 @@
     targets.forEach(rewriteLabelTarget);
   }
 
+  function restoreProfileTabs(root) {
+    const profile = location.pathname.match(/^\/([a-z0-9_]{1,15})(?:\/(?:with_replies|media|likes|reposts|articles|highlights|subscriptions))?\/?$/i);
+    if (!profile) return;
+
+    const prefix = `/${profile[1].toLowerCase()}/`;
+    const lists = new Set();
+    addMatches(root, 'main [role="tablist"]', lists);
+    for (const list of lists) {
+      const tabs = new Map();
+      for (const tab of list.querySelectorAll('a[role="tab"][href]')) {
+        if (tab.closest('[role="tablist"]') !== list) continue;
+        const path = tab.getAttribute("href").split(/[?#]/)[0].replace(/\/$/, "").toLowerCase();
+        if (path.startsWith(prefix)) tabs.set(path.slice(prefix.length), tab);
+      }
+      const replies = tabs.get("with_replies");
+      if (!replies || !tabs.has("media")) continue;
+
+      list.setAttribute("data-twitter-classic-profile-tabs", "on");
+      replies.setAttribute("data-twitter-classic-profile-replies", "on");
+      for (const route of ["reposts", "articles", "highlights", "subscriptions"]) {
+        tabs.get(route)?.setAttribute("data-twitter-classic-profile-extra-tab", "on");
+      }
+      rewriteLabelTarget(replies);
+    }
+  }
+
   function rewriteNotificationPhrases(root) {
     const articles = new Set();
     addMatches(root, 'article, [data-testid="cellInnerDiv"]', articles);
@@ -426,6 +481,34 @@
         }
       });
     }
+
+    if (pageKind() !== "notifications") return;
+
+    // The newer notifications list renders some system rows without article
+    // or cellInnerDiv. Match the leading system copy only on this timeline.
+    const main = 'main, [role="main"]';
+    const containers = root instanceof Element && root.closest(main) ? [root] : root.querySelectorAll(main);
+    const protectedContent = `article, ${POST_ROW_SELECTOR}, [data-slot="embedded-tweet-frame"], ${PROTECTED_CONTENT_SELECTOR}`;
+    const rewrite = (value) => value.replace(/^(\s*)New post notifications for\b/, "$1New Tweet notifications for");
+    for (const container of containers) {
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const next = rewrite(node.nodeValue);
+        if (next !== node.nodeValue && !node.parentElement?.closest(protectedContent)) {
+          node.nodeValue = next;
+        }
+      }
+
+      for (const element of [container, ...container.querySelectorAll('[aria-label], [title]')]) {
+        if (element.closest(protectedContent)) continue;
+        for (const attribute of ["aria-label", "title"]) {
+          const current = element.getAttribute(attribute);
+          if (!current) continue;
+          const next = rewrite(current);
+          if (current !== next) element.setAttribute(attribute, next);
+        }
+      }
+    }
   }
 
   function preserveNewTweetsPill(root) {
@@ -440,7 +523,7 @@
     addMatches(root, selector, controls);
 
     for (const control of controls) {
-      if (control.closest('article[data-testid="tweet"], [data-testid="tweetText"]')) {
+      if (control.closest('article, [data-testid="tweetText"]')) {
         continue;
       }
       control.setAttribute("data-twitter-classic-live-control", "on");
@@ -508,7 +591,8 @@
         'header[role="banner"] h1 a[href="/home"]',
         'header[role="banner"] h1 a[href$="/home"]',
         'header[role="banner"] h1 a[aria-label="X"]',
-        'header[role="banner"] h1 a[aria-label="Twitter"]'
+        'header[role="banner"] h1 a[aria-label="Twitter"]',
+        'a[href="/home"]:has(> svg[data-icon="icon-logo-x"], > svg > use[href="#icon-logo-x"])'
       ].join(","),
       logos
     );
@@ -526,12 +610,23 @@
       [
         '[data-testid="AppTabBar_Home_Link"]',
         'header[role="banner"] nav a[href="/home"]',
-        'header[role="banner"] nav a[href$="/home"]'
+        'header[role="banner"] nav a[href$="/home"]',
+        `${PRIMARY_NAV} > a[href="/home"]`
       ].join(","),
       homeLinks
     );
     for (const link of homeLinks) {
       link.setAttribute("data-twitter-classic-home-link", "on");
+      const nativeHome = link.querySelector('svg[data-icon="icon-home"], svg:has(use[href="#icon-home"])');
+      const modernSlot = nativeHome?.closest('span[aria-hidden="true"]');
+      const modernGlyphs = modernSlot && nativeHome.parentElement.parentElement;
+      if (modernGlyphs && modernGlyphs !== modernSlot && modernSlot.contains(modernGlyphs)) {
+        // Replace both native glyphs in the stack while leaving the unread badge beside it.
+        modernGlyphs.setAttribute("data-twitter-classic-home-icon-slot", "on");
+        modernGlyphs.setAttribute("data-twitter-classic-home-icon-state", link.matches('[aria-current="page"]') ? "filled" : "outline");
+        modernGlyphs.querySelectorAll("svg").forEach((svg) => svg.setAttribute("data-twitter-classic-native-home-icon", "on"));
+        continue;
+      }
       const svg = link.querySelector("svg");
       const slot = svg?.parentElement;
       if (!slot) {
@@ -584,17 +679,17 @@
     root.removeAttribute("data-twitter-classic-home-tabs");
 
     const primary = document.querySelector('[data-testid="primaryColumn"]');
-    if (!primary) {
-      return;
+    const modernTablist = document.querySelector('main header[data-page-header] [role="tablist"]:has(> [data-pinned-timeline="for-you"], > [data-pinned-timeline="following"])');
+    if (modernTablist) {
+      existingHeader?.remove();
+    } else if (primary) {
+      const header = existingHeader || createHomeHeader();
+      if (header.parentElement !== primary || primary.firstElementChild !== header) {
+        primary.prepend(header);
+      }
     }
 
-    const header = existingHeader || createHomeHeader();
-    header.querySelectorAll("button").forEach((button) => button.remove());
-    if (header.parentElement !== primary || primary.firstElementChild !== header) {
-      primary.prepend(header);
-    }
-
-    const tablist = [...primary.querySelectorAll('[role="tablist"]')].find(
+    const tablist = modernTablist || [...(primary?.querySelectorAll('[role="tablist"]') || [])].find(
       (candidate) => !candidate.closest(`article, ${MEDIA_SELECTOR}`)
     );
     if (tablist) {
@@ -604,7 +699,7 @@
       const row = tablist.parentElement;
       const safeRow = row && row !== primary &&
         !row.matches('main, [role="main"], [data-testid="primaryColumn"]') &&
-        !row.querySelector('article, [data-testid^="tweetTextarea_"], [data-testid="toolBar"], [data-testid="tweetPhoto"], [data-testid="videoPlayer"]');
+        !row.querySelector('article, textarea, [data-testid^="tweetTextarea_"], [data-testid="toolBar"], [data-testid="tweetPhoto"], [data-testid="videoPlayer"]');
       if (safeRow) {
         row.setAttribute("data-twitter-classic-native-tabs-shell", "on");
       }
@@ -648,6 +743,7 @@
     if (!editor) {
       return;
     }
+    restoreReplyHintAttributes(editor);
 
     const editorRoot = editor.closest(".DraftEditor-root") || editor.parentElement;
     const describedIds = (editor.getAttribute("aria-describedby") || "").split(/\s+/);
@@ -657,20 +753,28 @@
         node && /placeholder/i.test(node.id)
       );
     const nativeText = nativePlaceholder?.textContent.trim();
+    if (nativeText === "Post your reply" && !editor.contains(nativePlaceholder)) {
+      const walker = document.createTreeWalker(nativePlaceholder, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const next = replaceExactLabel(node.nodeValue);
+        if (next !== node.nodeValue) node.nodeValue = next;
+      }
+    }
     const attributeText = editor.getAttribute("data-placeholder") || editor.getAttribute("placeholder");
     const replyLike = pageKind() === "status" || /reply|comment/i.test(
       `${editor.getAttribute("aria-label") || ""} ${nativeText || ""} ${attributeText || ""}`
     );
     const englishInterface = !document.documentElement.lang || /^en\b/i.test(document.documentElement.lang);
-    const placeholder = nativeText || attributeText ||
-      (englishInterface ? (replyLike ? "Post your reply" : "What’s happening?") : "");
+    const placeholder = (nativeText === "Post your reply" ? "Tweet your reply" : nativeText) || attributeText ||
+      (englishInterface ? (replyLike ? "Tweet your reply" : "What’s happening?") : "");
     const text = editor instanceof HTMLTextAreaElement ? editor.value : editor.textContent;
     const empty = !(text || "").replace(/[\u200b-\u200d\ufeff\r\n]/g, "").length;
 
     editor.setAttribute("data-twitter-classic-editor", "on");
     editor.setAttribute("data-twitter-classic-editor-empty", empty ? "on" : "off");
     editor.setAttribute("data-twitter-classic-editor-placeholder", placeholder);
-    editor.setAttribute("data-twitter-classic-editor-native-placeholder-present", nativePlaceholder ? "on" : "off");
+    const hasNativePlaceholder = nativePlaceholder || (editor instanceof HTMLTextAreaElement && attributeText);
+    editor.setAttribute("data-twitter-classic-editor-native-placeholder-present", hasNativePlaceholder ? "on" : "off");
     if (nativePlaceholder) {
       nativePlaceholder.setAttribute("data-twitter-classic-editor-native-placeholder", "on");
     }
@@ -697,7 +801,7 @@
     const counters = new Set();
     addMatches(root, COUNTER_SELECTOR, counters);
     counters.forEach((counter) => {
-      if (!counter.closest('[data-twitter-classic-composer], [data-testid="toolBar"]')) {
+      if (!counter.closest('[data-twitter-classic-composer], [data-testid="toolBar"], [data-twitter-classic-modern-composer]')) {
         return;
       }
       const circles = [...counter.querySelectorAll("svg circle")].filter((circle) =>
@@ -721,6 +825,50 @@
         );
       });
     });
+  }
+
+  function estimateDraftLength(value) {
+    // The early ring is visual guidance for a standard Tweet. Use twitter-text's
+    // character weights, with X's own count taking over as soon as it mounts.
+    const text = value.normalize("NFC").replace(/https?:\/\/[^\s<>"']+/gi, (url) => {
+      const punctuation = url.match(/[.,!?;:]+$/)?.[0] || "";
+      return "x".repeat(23) + punctuation;
+    });
+    let length = 0;
+    for (const { segment } of draftCharacters.segment(text)) {
+      if (/[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u.test(segment)) {
+        length += 2;
+        continue;
+      }
+      for (const character of segment) {
+        const code = character.codePointAt(0);
+        const singleWeight = code <= 0x10ff || (code >= 0x2000 && code <= 0x200d) ||
+          (code >= 0x2010 && code <= 0x201f) || (code >= 0x2032 && code <= 0x2037);
+        length += singleWeight ? 1 : 2;
+      }
+    }
+    return length;
+  }
+
+  function restoreEarlyCounter(editor, submit) {
+    const slot = submit.parentElement?.firstElementChild;
+    if (!slot?.matches('div.flex.items-center.gap-1')) return;
+
+    let ring = slot.querySelector(':scope > [data-twitter-classic-early-counter]');
+    if (!editor.value || slot.querySelector(COUNTER_SELECTOR)) {
+      ring?.remove();
+      return;
+    }
+    if (!ring) {
+      ring = document.createElement("span");
+      ring.setAttribute("data-twitter-classic-early-counter", "on");
+      ring.setAttribute("aria-hidden", "true");
+      slot.append(ring);
+    }
+    const progress = `${Math.min(100, estimateDraftLength(editor.value) / 280 * 100)}%`;
+    if (ring.style.getPropertyValue("--twitter-counter-progress") !== progress) {
+      ring.style.setProperty("--twitter-counter-progress", progress);
+    }
   }
 
   function markComposer(input) {
@@ -825,6 +973,96 @@
       if (text) {
         button.removeAttribute("data-twitter-classic-fallback-label");
       }
+    }
+  }
+
+  function markModernComposers(root) {
+    const toolbars = new Set();
+    addMatches(root, MODERN_COMPOSER_TOOLBAR, toolbars);
+    const existingToolbar = root instanceof Element && root
+      .closest('[data-twitter-classic-modern-composer]')?.querySelector(MODERN_COMPOSER_TOOLBAR);
+    if (existingToolbar) toolbars.add(existingToolbar);
+    for (const toolbar of toolbars) {
+      // The current composer has a native textarea and a container-query toolbar.
+      // Stop at the first ancestor containing both, before reaching a feed or dialog.
+      let composer = toolbar.parentElement;
+      for (let depth = 0; composer && depth < 8; depth++, composer = composer.parentElement) {
+        if (composer.matches('main, body, [role="dialog"]') || composer.querySelector('article')) {
+          break;
+        }
+        const editor = composer.querySelector('textarea[aria-multiline="true"]');
+        if (!editor) continue;
+
+        composer.setAttribute("data-twitter-classic-modern-composer", "on");
+        toolbar.setAttribute("data-twitter-classic-modern-toolbar", "on");
+        editor.setAttribute("data-twitter-classic-modern-editor", "on");
+        for (const button of composer.querySelectorAll('button[data-slot="xds-button"]')) {
+          if (!toolbar.contains(button) && /^(Post|Tweet|Reply)( all)?$/.test(button.textContent.trim())) {
+            button.setAttribute("data-twitter-classic-modern-submit", "on");
+            rewriteLabelTarget(button);
+            restoreEarlyCounter(editor, button);
+          }
+        }
+        toolbar.querySelectorAll("button[aria-label]").forEach(rewriteLabelTarget);
+        markCharacterCounters(composer);
+        break;
+      }
+    }
+  }
+
+  function restoreModernHomeLabels(root) {
+    const composeLinks = new Set();
+    addMatches(root, 'a#sidebar-compose-post[href="/compose/post"]', composeLinks);
+    for (const link of composeLinks) {
+      link.setAttribute("data-twitter-classic-modern-compose", "on");
+      rewriteLabelTarget(link);
+    }
+
+    if (pageKind() !== "home") return;
+
+    const controls = new Set();
+    addMatches(root, 'main :is(button, [role="button"], a)', controls);
+    const showPosts = /^(\s*Show [\d,.]+[KMB]?(?: new)? )posts(\s*)$/i;
+    for (const control of controls) {
+      if (control.closest(`article, ${PROTECTED_CONTENT_SELECTOR}`)) continue;
+      const label = control.getAttribute("aria-label");
+      if (label && showPosts.test(label)) control.setAttribute("aria-label", label.replace(showPosts, "$1Tweets$2"));
+      if (!showPosts.test(control.textContent)) continue;
+      const walker = document.createTreeWalker(control, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const next = node.nodeValue.replace(/\bposts(\s*)$/i, "Tweets$1");
+        if (next !== node.nodeValue) node.nodeValue = next;
+      }
+    }
+  }
+
+  function restoreTranslationIcons(root) {
+    const controls = new Set();
+    addMatches(root, 'button, a[role="button"], [role="button"], [data-testid="translateTweet"]', controls);
+    for (const control of controls) {
+      const translationLabel = /^(?:Show translation|Hide translation|Translate (?:post|Tweet))$/i;
+      if (![control.getAttribute("aria-label"), control.textContent].some((label) => translationLabel.test(label?.trim() || ""))) continue;
+      control.setAttribute("data-twitter-classic-translation-control", "on");
+      control.removeAttribute("data-twitter-classic-post-twitter");
+
+      const original = control.querySelector('svg[data-icon*="grok" i], svg:has(use[href*="grok" i])');
+      if (!original) continue;
+      original.setAttribute("data-twitter-classic-translation-original", "on");
+      const existingIcon = control.querySelector('svg[data-twitter-classic-translation-icon]');
+      if (existingIcon) {
+        if (existingIcon !== original.previousElementSibling) original.before(existingIcon);
+        continue;
+      }
+
+      const svgNamespace = "http://www.w3.org/2000/svg";
+      const icon = document.createElementNS(svgNamespace, "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("aria-hidden", "true");
+      icon.setAttribute("data-twitter-classic-translation-icon", "on");
+      const glyph = document.createElementNS(svgNamespace, "path");
+      glyph.setAttribute("d", "M7.5 3v2M2.5 6h10M4.5 6c1 4 3.5 7 7 9M10.5 6c-1 4-3.5 7-7 9M13 21l4.5-11L22 21M14.4 17.5h6.2");
+      icon.append(glyph);
+      original.before(icon);
     }
   }
 
@@ -972,8 +1210,8 @@
         'header[role="banner"] a[href^="/i/premium"]',
         'header[role="banner"] a[href="/i/connect_people"]',
         'header[role="banner"] a[href*="creators/studio"]',
+        `${PRIMARY_NAV} > a:is([href="/i/grok"], [href="/i/connect_people"], [href="/i/calls"], [href^="/i/premium"], [href*="creators/studio"])`,
         'a[href="/i/grok"]',
-        'a[href*="/i/grok"]',
         ':is(button, a, [role="button"])[aria-label*="Grok" i]',
         ':is(button, a, [role="button"])[title*="Grok" i]',
         '[data-testid*="grok" i]',
@@ -982,13 +1220,38 @@
       ].join(","),
       direct
     );
-    direct.forEach((element) =>
-      element.setAttribute("data-twitter-classic-post-twitter", "on")
-    );
+    const profileSummaryControls = new Set();
+    addMatches(root, 'button, [role="button"], a[href]:has(svg[data-icon="icon-logo-grok"], use[href="#icon-logo-grok"])', profileSummaryControls);
+    for (const control of profileSummaryControls) {
+      const label = control.getAttribute("aria-label") || control.textContent;
+      if (/^Profile Summary$/i.test(label.trim())) direct.add(control);
+    }
+    for (const element of direct) {
+      if (element.closest('[data-twitter-classic-translation-control]')) continue;
+      if (element.closest(PROTECTED_CONTENT_SELECTOR)) continue;
+      if (element.closest(`article, ${POST_ROW_SELECTOR}`) && !element.matches('button')) continue;
+      const dock = element.closest('[data-slot="xds-dock-window"]');
+      (dock || element).setAttribute("data-twitter-classic-post-twitter", "on");
+    }
+
+    const sidebarCards = new Set();
+    addMatches(root, 'aside section:has(> h2, > * > h2)', sidebarCards);
+    for (const card of sidebarCards) {
+      const heading = card.querySelector(":scope > h2, :scope > * > h2");
+      if (/^Today(?:’|')s News$/i.test(heading.textContent.trim())) {
+        card.setAttribute("data-twitter-classic-post-twitter", "on");
+      }
+    }
 
     const anchors = new Set();
     addMatches(root, 'a[href^="/i/premium"], a[href*="premium_sign_up"]', anchors);
     for (const anchor of anchors) {
+      if (anchor.closest(`article, ${PROTECTED_CONTENT_SELECTOR}`)) continue;
+      const callout = anchor.closest('main [data-slot="xds-callout"]');
+      if (callout && anchor.matches('a[href^="/i/premium_sign_up"]')) {
+        callout.setAttribute("data-twitter-classic-post-twitter", "on");
+        continue;
+      }
       let card = anchor.closest("aside, section");
       if (card) {
         const rect = card.getBoundingClientRect();
@@ -1001,19 +1264,65 @@
 
     const textCandidates = root.querySelectorAll?.("h1, h2, h3, span, div[dir='auto']") || [];
     for (const textElement of [...textCandidates].slice(0, 1600)) {
-      if (!/^(Grok|Premium|Subscribe to Premium|Creator Studio|Get Verified)$/i.test(textElement.textContent.trim())) {
+      if (!/^(Grok|Premium|Subscribe to Premium|Creator Studio|Get Verified|Generate image)$/i.test(textElement.textContent.trim())) {
         continue;
       }
       const control = textElement.closest(
         'header[role="banner"] a, header[role="banner"] button, [role="menuitem"], aside, section'
       );
-      if (control) {
+      if (control && !textElement.closest(`article, ${PROTECTED_CONTENT_SELECTOR}`)) {
         if (control.closest('[data-testid="sidebarColumn"]')) {
           markDeElonCardShells(control);
         } else {
           control.setAttribute("data-twitter-classic-post-twitter", "on");
         }
       }
+    }
+  }
+
+  function clearGrokPrompt(row, entry) {
+    row.removeAttribute("data-twitter-classic-grok-prompt");
+    entry.toggle.remove();
+    grokPrompts.delete(row);
+  }
+
+  function markGrokPrompts(root) {
+    if (!options.deElon || root.getRootNode() instanceof ShadowRoot) return;
+    const bodies = new Set();
+    addMatches(root, POST_TEXT_SELECTOR, bodies);
+    for (const body of bodies) {
+      const article = body.closest("article");
+      if (!article?.closest('main, [role="main"]') || body.closest('[data-slot="embedded-tweet-frame"], [data-testid="quoteTweet"]')) continue;
+
+      // Keep the disclosure in the same native list item so virtualized feeds
+      // measure the collapsed height and don't leave an empty slot behind.
+      const row = article.parentElement.matches(POST_ROW_SELECTOR) ? article.parentElement : article;
+      const existing = grokPrompts.get(row);
+      const path = row.getAttribute("data-href") || article.querySelector('a[href*="/status/"]:has(time)')?.getAttribute("href");
+      const isOpenTweet = pageKind() === "status" && (!path || path.split("?")[0] === location.pathname);
+      const directPrompt = /^(?:(?:hey|hi|yo)\s+)?@grok(?=$|[\s,.:!?])/i.test(body.textContent.trim());
+      if (isOpenTweet || !directPrompt) {
+        if (existing?.body === body) clearGrokPrompt(row, existing);
+        continue;
+      }
+      if (existing?.body === body && existing.path === path && existing.toggle.parentElement === row.parentElement) continue;
+      if (existing) clearGrokPrompt(row, existing);
+
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.setAttribute("data-twitter-classic-grok-toggle", "on");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "Show hidden Grok prompt";
+      toggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        row.setAttribute("data-twitter-classic-grok-prompt", expanded ? "collapsed" : "expanded");
+        toggle.textContent = expanded ? "Show hidden Grok prompt" : "Hide Grok prompt";
+      });
+      row.before(toggle);
+      row.setAttribute("data-twitter-classic-grok-prompt", "collapsed");
+      grokPrompts.set(row, { body, path, toggle });
     }
   }
 
@@ -1139,10 +1448,16 @@
   }
 
   function restoreChatShadowRoots() {
-    const hosts = document.querySelectorAll(
+    const hosts = new Set(document.querySelectorAll(
       '[data-testid="xchatEmbedRoute"], [data-testid="xchatEmbedOverlays"]'
-    );
+    ));
+    // Recent X builds dropped the host test IDs. The mounted Chat document
+    // carries its own marker inside the open shadow root.
+    for (const candidate of document.querySelectorAll('body > div, main [class*="--dm-bottom-inset"], [data-slot="xds-dock-window"] [class*="--dm-bottom-inset"]')) {
+      if (candidate.shadowRoot?.querySelector('[data-xchat-root]')) hosts.add(candidate);
+    }
     let waitingForShadow = false;
+    let routeMounted = false;
     for (const host of hosts) {
       host.setAttribute("data-twitter-classic-chat-host", "on");
       host.setAttribute("data-twitter-classic-theme", options.classicDark ? "dim" : "light");
@@ -1150,6 +1465,9 @@
       if (!shadow) {
         waitingForShadow = true;
         continue;
+      }
+      if (host.matches('[data-testid="xchatEmbedRoute"]') || shadow.querySelector('[data-xchat-root="route"]')) {
+        routeMounted = true;
       }
       let stylesheet = shadow.querySelector('link[data-twitter-classic-chat-stylesheet="on"]');
       if (!stylesheet) {
@@ -1180,7 +1498,7 @@
     }
     // attachShadow itself does not fire the document observer. Retry only
     // while entering Chat or while a known embed host is still attaching.
-    if ((pageKind() === "messages" && !hosts.length) || waitingForShadow) {
+    if ((pageKind() === "messages" && !routeMounted) || waitingForShadow) {
       if (!chatRetryTimer && chatRetryCount < 24) {
         chatRetryCount += 1;
         chatRetryTimer = window.setTimeout(() => {
@@ -1415,20 +1733,38 @@
     });
   }
 
+  function restoreFooterBranding(root) {
+    const footers = new Set();
+    addMatches(root, 'nav[aria-label="Footer"], [data-testid="sidebarColumn"] footer, footer[role="contentinfo"]', footers);
+    for (const footer of footers) {
+      const walker = document.createTreeWalker(footer, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const next = node.nodeValue.replace(/(\u00a9\s*20\d{2}\s+)X Corp\.?/gi, "$1Twitter, Inc.");
+        if (next !== node.nodeValue) node.nodeValue = next;
+      }
+    }
+  }
+
   function processRoot(root) {
     const normalized = root instanceof Text ? root.parentElement : root;
     if (!(normalized instanceof Element || normalized instanceof Document || normalized instanceof DocumentFragment)) {
       return;
     }
     restoreLabels(normalized);
+    restoreProfileTabs(normalized);
     rewriteNotificationPhrases(normalized);
     preserveNewTweetsPill(normalized);
     restoreBirdAndHomeIcon(normalized);
     markComposers(normalized);
+    markModernComposers(normalized);
+    restoreModernHomeLabels(normalized);
+    restoreTranslationIcons(normalized);
+    restoreFooterBranding(normalized);
     markCharacterCounters(normalized);
     markBackButtons(normalized);
     markSearchPills(normalized);
     markDeElonControls(normalized);
+    markGrokPrompts(normalized);
     normalizeVisualLeaks(normalized);
   }
 
@@ -1444,6 +1780,9 @@
     restoreHomeChrome();
     reconcileSignedOutLanding();
     restoreChatShadowRoots();
+    for (const [row, entry] of grokPrompts) {
+      if (!row.isConnected || !row.contains(entry.body)) clearGrokPrompt(row, entry);
+    }
 
     const roots = [...pendingRoots];
     pendingRoots.clear();
@@ -1513,7 +1852,7 @@
     document.addEventListener("input", (event) => {
       const target = event.composedPath()[0];
       if (target instanceof Element &&
-          target.matches('[data-twitter-classic-editor], [data-testid^="tweetTextarea_"]')) {
+          target.matches('[data-twitter-classic-editor], [data-twitter-classic-modern-editor], [data-testid^="tweetTextarea_"]')) {
         schedule(target);
       }
     }, true);

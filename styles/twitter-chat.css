@@ -78,13 +78,15 @@
 
 :host([data-twitter-classic-chat-host="on"]) :is(
   .bg-background,
+  [data-xchat-root="route"],
   [data-testid="dm-container"],
   [data-testid="dm-inbox-panel"],
   [data-testid="dm-conversation-panel"],
   [data-testid="dm-conversation-header"],
   [data-testid="dm-composer-container"],
   [data-testid="dm-composer-form"],
-  [data-testid="dm-empty-conversation"]
+  [data-testid="dm-empty-conversation"],
+  [data-testid="dm-empty-conversation-state"]
 ) {
   background-color: var(--twitter-surface, #ffffff) !important;
   background-image: none !important;
@@ -103,6 +105,11 @@
 
 :host([data-twitter-classic-chat-host="on"]) [data-testid="dm-search-bar"] {
   background-color: transparent !important;
+}
+
+:host([data-twitter-classic-chat-host="on"]) [data-testid="dm-search-input"]:focus-visible {
+  outline: 2px solid var(--twitter-blue, #1da1f2) !important;
+  outline-offset: -2px;
 }
 
 :host([data-twitter-classic-chat-host="on"]) [data-twitter-classic-surface="surface"] {

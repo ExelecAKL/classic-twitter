@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.3.2-1da1f2" alt="Version 1.3.2">
+  <img src="https://img.shields.io/badge/version-1.3.5-1da1f2" alt="Version 1.3.5">
   <img src="https://img.shields.io/badge/Manifest-V3-657786" alt="Manifest V3">
   <img src="https://img.shields.io/badge/Chrome%20%26%20Edge-supported-1da1f2" alt="Chrome and Edge supported">
   <img src="https://img.shields.io/badge/extension-runtime%20dependencies%3A%200-657786" alt="No runtime dependencies">
@@ -40,14 +40,26 @@ This is a visual customization of X's existing interface—not a replacement soc
 - **Twitter colors:** Twitter blue accents, readable light surfaces, and optional navy Dim mode.
 - **Familiar wording:** Tweet, Retweet, Quote Tweet, and Messages in supported English interface labels.
 - **Native Home feed:** For you and Following stay available; the timeline `+` blends into the tab strip.
-- **Composer polish:** a muted “What's happening?” hint, flat blue toolbar icons, and the native proportional character counter with warning and limit colors.
+- **Composer polish:** a muted “What's happening?” hint, flat blue toolbar icons, and a character ring that starts with the first character. X's native counter shows the exact count near the limit.
 - **Media and search fixes:** full-size photo carousels, visible recent-search avatars, and a single search focus outline.
 - **Consistent highlights:** one blue-tinted navigation highlight rather than overlapping hover layers.
 - **Modern Chat support:** light and Dim styling for X's newer isolated Chat interface, while preserving native conversations and controls.
 - **Signed-out styling:** Twitter artwork and bird branding on X's existing landing page and login dialogs.
 - **Optional De-Elon mode:** hides supported Grok, Premium, subscription, and promotional surfaces.
 
-### What's new in 1.3.2
+### What's new in 1.3.5
+
+Fixes overlapping text in X's refreshed composer and shows the character ring while typing. X's own counter takes over at the warning threshold. The native translation control keeps its behavior and uses a simple 文/A icon.
+
+### 1.3.4
+
+Fixes the clipped Home heading, aligns the timeline controls, and adds a right gutter to the expanded navigation. The signed-in footer shows Twitter, Inc., and the current Messages panes follow Light or Dim. De-Elon folds Tweets that lead with a direct `@grok` mention into a compact, expandable row.
+
+### 1.3.3
+
+Restores the bird, Home icon, Tweet buttons, and blue composer tools on X's newer Home layout. De-Elon mode hides inactive extra timeline tabs, Calls, Creator Studio, Today’s News, and Grok controls, including the floating Grok panel. Chat appears as Messages, and saved posts remain available in History.
+
+### 1.3.2
 
 Fixed undersized carousel pictures, doubled navigation and search highlights, missing recent-search avatars, dark Chat panels, the missing composer hint, and the character counter's solid-blue track. Local validation covers 53 static checks and 47 browser-fixture checks, with additional mouse-hover checks available in the optional runner.
 
@@ -160,7 +172,7 @@ With the server running, open:
 
 - `http://127.0.0.1:4173/tests/v13-regression-fixture.html` — earlier Home and interface checks.
 - `http://127.0.0.1:4173/tests/current-regression-fixture.html` — carousels, avatars, focus states, composer hints, counter colors, and Chat shadow roots.
-- `http://127.0.0.1:4173/tests/v13-auth-regression-fixture.html` — signed-out and authentication styling fixture.
+- `http://127.0.0.1:4173/i/jf/onboarding/web` — signed-out and authentication styling fixture.
 
 The first two fixtures display their pass/fail results in the page. These checks are local; they do not post Tweets, sign in, or send messages to X.
 

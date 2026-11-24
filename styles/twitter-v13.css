@@ -139,7 +139,7 @@ html[data-twitter-classic="on"] .r-18bvks7 {
 
 html[data-twitter-classic="on"] :is(
   [data-twitter-classic-logo-slot="on"],
-  header[role="banner"] a[data-twitter-classic-logo="on"]
+  a[data-twitter-classic-logo="on"]
 ) {
   border: 0 !important;
   border-radius: 0 !important;
@@ -147,18 +147,18 @@ html[data-twitter-classic="on"] :is(
   outline: 0 !important;
 }
 
-html[data-twitter-classic="on"] header[role="banner"]
+html[data-twitter-classic="on"]
   a[data-twitter-classic-logo="on"],
-html[data-twitter-classic="on"] header[role="banner"]
+html[data-twitter-classic="on"]
   a[data-twitter-classic-logo="on"]:is(:hover, :focus, :active),
-html[data-twitter-classic="on"] header[role="banner"]
+html[data-twitter-classic="on"]
   a[data-twitter-classic-logo="on"] > * {
   background-color: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
 
-html[data-twitter-classic="on"] header[role="banner"]
+html[data-twitter-classic="on"]
   a[data-twitter-classic-logo="on"] {
   background-image: var(--twitter-classic-bird-image) !important;
   background-position: center !important;
@@ -166,7 +166,7 @@ html[data-twitter-classic="on"] header[role="banner"]
   background-size: 30px 30px !important;
 }
 
-html[data-twitter-classic="on"] header[role="banner"]
+html[data-twitter-classic="on"]
   a[data-twitter-classic-logo="on"] svg {
   opacity: 0 !important;
   visibility: hidden !important;
@@ -658,6 +658,48 @@ html[data-twitter-classic="on"] :is(
 html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
   [data-twitter-classic-post-twitter="on"] {
   display: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"] :is(
+  main div:has(> [data-slot="xds-callout"][data-twitter-classic-post-twitter="on"]:only-child),
+  [data-slot="xds-dock-window"]:has([data-slot="xds-dock-launcher"] :is([data-icon="icon-logo-grok"], use[href="#icon-logo-grok"])),
+  [data-twitter-classic-modern-toolbar] > [data-truncated-item]:has(:is([aria-label="Generate image"], [data-icon="icon-logo-grok"], use[href="#icon-logo-grok"])),
+  article button[data-slot="xds-button"]:not([data-twitter-classic-translation-control]):is([aria-label="Explain this post"], :has([data-icon="icon-logo-grok"], use[href="#icon-logo-grok"]))
+) {
+  display: none !important;
+}
+
+[data-twitter-classic-grok-toggle] {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
+  [data-twitter-classic-grok-prompt="collapsed"] {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
+  [data-twitter-classic-grok-toggle] {
+  display: block !important;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-block-end: 1px solid var(--twitter-border);
+  background: var(--twitter-soft);
+  color: var(--twitter-ink) !important;
+  text-align: start;
+  cursor: pointer;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
+  [data-twitter-classic-grok-toggle]:is(:hover, :focus-visible) {
+  background: var(--twitter-soft-hover);
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-grok-toggle]:focus-visible {
+  outline: 2px solid var(--twitter-blue);
+  outline-offset: -3px;
 }
 
 /* Messages: classic light or 2021 dark-blue Dim, never pitch black. */
@@ -1517,6 +1559,210 @@ html[data-twitter-classic="on"]
   svg [data-twitter-classic-counter-arc="on"] {
   color: var(--twitter-counter-color) !important;
   stroke: var(--twitter-counter-color) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-early-counter] {
+  display: inline-block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: conic-gradient(var(--twitter-blue) var(--twitter-counter-progress), var(--twitter-border) 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+}
+
+/* The newer XDS layout no longer uses React Native's Home and composer IDs. */
+html[data-twitter-classic="on"] nav[aria-label="Primary"] {
+  --x-btn-ghost-hover: var(--twitter-soft-hover) !important;
+  --x-fg-primary: var(--twitter-ink) !important;
+  --x-border-active: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] nav[aria-label="Primary"] > a > span > span:last-child > span {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+html[data-twitter-classic="on"] nav[aria-label="Primary"] > a[aria-current="page"] :is(span, svg) {
+  color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] nav[aria-label="Primary"]:has(+ div > #sidebar-compose-post),
+html[data-twitter-classic="on"] nav[aria-label="Primary"] + div:has(> #sidebar-compose-post) {
+  padding-inline-end: calc(12px + 14px * var(--x-sidebar-expanded, 0)) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  a[data-twitter-classic-logo="on"],
+  [data-twitter-classic-timeline-plus="on"]
+):focus-visible {
+  outline: 2px solid var(--twitter-blue) !important;
+  outline-offset: -3px !important;
+}
+
+html[data-twitter-classic="on"] main header[data-page-header] span:has(
+  > svg[data-icon="icon-logo-x"], > svg > use[href="#icon-logo-x"]
+) {
+  background: var(--twitter-classic-bird-image) center / contain no-repeat !important;
+}
+
+html[data-twitter-classic="on"] main header[data-page-header] :is(
+  svg[data-icon="icon-logo-x"], svg:has(> use[href="#icon-logo-x"])
+) {
+  visibility: hidden !important;
+}
+
+@media (min-width: 640px) {
+  html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+    main header[data-page-header]:has([data-pinned-timeline="for-you"]) > h1.sr-only {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 10px 16px !important;
+    clip: auto !important;
+    clip-path: none !important;
+    overflow: visible !important;
+    background: var(--twitter-surface) !important;
+    border-bottom: 1px solid var(--twitter-border) !important;
+    color: var(--twitter-ink) !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    line-height: 24px !important;
+  }
+
+  html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+    main [data-twitter-classic-modern-composer] :has(> textarea[data-twitter-classic-modern-editor]) {
+    min-block-size: 68px;
+  }
+}
+
+/* Keep the selected tab reachable if De-Elon is enabled while viewing it. */
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"][data-twitter-classic-page="home"]
+  [data-twitter-classic-native-tabs]:has(> [data-pinned-timeline="for-you"]):has(> [data-pinned-timeline="following"])
+  > [role="tab"]:not([data-pinned-timeline="for-you"], [data-pinned-timeline="following"], [aria-selected="true"]) {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
+  [data-twitter-classic-profile-tabs] [data-twitter-classic-profile-extra-tab]:not([aria-selected="true"]) {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinned-timeline] {
+  color: var(--twitter-secondary) !important;
+  font-weight: 700 !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinned-timeline][aria-selected="true"] {
+  color: var(--twitter-ink) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinned-timeline]:is(:hover, :focus-visible) {
+  background: var(--twitter-soft-hover) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-native-tabs] > [data-pinned-timeline]:focus-visible {
+  outline: 2px solid var(--twitter-blue) !important;
+  outline-offset: -3px !important;
+}
+
+html[data-twitter-classic="on"] :is([data-twitter-classic-native-tabs], [data-twitter-classic-profile-tabs]) [data-tab-underline] {
+  inset-inline: 0 !important;
+  width: min(60%, 56px) !important;
+  margin-inline: auto !important;
+  background: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  main header[data-page-header] [data-twitter-classic-timeline-plus] {
+  width: 48px !important;
+  min-width: 48px !important;
+  flex-basis: 48px !important;
+  margin: 0 !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-modern-editor] {
+  color: var(--twitter-ink) !important;
+  caret-color: var(--twitter-blue) !important;
+  font-size: 20px !important;
+}
+
+/* X paints formatted text beneath a transparent textarea. Keep the two
+   layers at the same size and let the textarea provide the caret and input. */
+html[data-twitter-classic="on"] :has(> textarea[data-twitter-classic-modern-editor])
+  > [aria-hidden="true"][class~="col-start-1"][class~="pointer-events-none"] {
+  color: var(--twitter-ink) !important;
+  font-size: 20px !important;
+}
+
+html[data-twitter-classic="on"] textarea[aria-multiline="true"][class~="text-transparent!"] {
+  color: transparent !important;
+  caret-color: var(--twitter-blue) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-modern-editor]::placeholder {
+  color: var(--twitter-secondary) !important;
+  opacity: 1 !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-translation-original] {
+  display: none !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-translation-icon] {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  vertical-align: text-bottom;
+  color: var(--twitter-secondary);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-modern-toolbar] button {
+  color: var(--twitter-blue) !important;
+  --x-btn-ghost-hover: var(--twitter-soft-hover) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-modern-toolbar] button svg {
+  color: inherit !important;
+}
+
+html[data-twitter-classic="on"] :is([data-twitter-classic-modern-compose], [data-twitter-classic-modern-submit]) {
+  background: var(--twitter-blue) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+html[data-twitter-classic="on"] :is([data-twitter-classic-modern-compose], [data-twitter-classic-modern-submit]) :is(span, svg) {
+  color: inherit !important;
+}
+
+html[data-twitter-classic="on"] :is([data-twitter-classic-modern-compose], [data-twitter-classic-modern-submit]):hover:not(:disabled) {
+  background: var(--twitter-blue-hover) !important;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-modern-submit]:disabled {
+  background: var(--twitter-blue) !important;
+  opacity: 0.5 !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  aside section:not(section section):has(> h2, > * > h2) {
+  background: var(--twitter-soft) !important;
+  border-color: var(--twitter-border) !important;
+  --x-fg-primary: var(--twitter-ink) !important;
+  --x-fg-secondary: var(--twitter-secondary) !important;
+}
+
+html[data-twitter-classic="on"][data-twitter-classic-page="home"]
+  aside :is(section:not(section section) > h2, section:not(section section) > :is(div, header) > h2) {
+  font-weight: 800 !important;
 }
 
 /* Native signed-out forms remain X's real forms and validation logic. */
