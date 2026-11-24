@@ -5,27 +5,40 @@
 <h1 align="center">Classic Twitter</h1>
 
 <p align="center">
-  Make X feel like Twitter again.<br>
-  A lightweight browser extension inspired by Twitter's late-2021 / early-2022 interface.
+  <strong>Twitter was better when it was Twitter.</strong><br>
+  Bring the blue bird, Tweets, and a quieter timeline back to X.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.3.5-1da1f2" alt="Version 1.3.5">
+  <a href="https://github.com/ExelecAKL/classic-twitter/releases/latest"><img src="https://img.shields.io/github/v/release/ExelecAKL/classic-twitter?color=1da1f2&label=release" alt="Latest GitHub release"></a>
   <img src="https://img.shields.io/badge/Manifest-V3-657786" alt="Manifest V3">
   <img src="https://img.shields.io/badge/Chrome%20%26%20Edge-supported-1da1f2" alt="Chrome and Edge supported">
-  <img src="https://img.shields.io/badge/extension-runtime%20dependencies%3A%200-657786" alt="No runtime dependencies">
+  <img src="https://img.shields.io/badge/runtime%20dependencies-0-657786" alt="Zero runtime dependencies">
+</p>
+
+<p align="center">
+  <a href="https://github.com/ExelecAKL/classic-twitter/releases/latest"><strong>Download the latest release</strong></a>
+  · <a href="#install">Install guide</a>
+  · <a href="#features">Features</a>
+  · <a href="https://github.com/ExelecAKL/classic-twitter/issues">Report an issue</a>
 </p>
 
 ---
 
-Classic Twitter restores Twitter-era colors, the blue bird, familiar Home icons, and **Tweet / Retweet** wording on the current X website. Choose the classic light theme or Twitter's navy **Dim** theme, and optionally hide newer X promotional surfaces.
+Classic Twitter is a lightweight Chrome and Edge extension inspired by Twitter in late 2021 and early 2022. It brings back the bird, familiar Home icons, **Tweet / Retweet** wording, and the choice of classic **Light** or navy **Dim**. It also hides marked timeline ads and gives you a switch for the newer clutter.
 
-This is a visual customization of X's existing interface—not a replacement social network or a custom login page. Timelines, posting, messages, search, and authentication continue to use X's native controls and behavior.
+## Why this exists
 
-## Contents
+Twitter didn't need to look like a different website to make room for new features. The blue bird, the word *Tweet*, and a well-behaved Home feed gave the place a personality. This project is for anyone who still misses it.
+
+Classic Twitter changes the interface you see, not the platform underneath it. Timelines, posting, messages, search, and sign-in still use X's native controls. No new account, custom login page, or analytics.
+
+<details>
+<summary><strong>Contents</strong></summary>
 
 - [Features](#features)
 - [Install](#install)
+- [Release history](#release-history)
 - [Extension controls](#extension-controls)
 - [Update or remove](#update-or-remove)
 - [Privacy and permissions](#privacy-and-permissions)
@@ -34,40 +47,31 @@ This is a visual customization of X's existing interface—not a replacement soc
 - [Sharing the extension](#sharing-the-extension)
 - [Contributing](#contributing)
 
+</details>
+
 ## Features
 
 - **Classic branding:** blue bird logos, a bird loading screen, Twitter favicon, and classic Home icons.
 - **Twitter colors:** Twitter blue accents, readable light surfaces, and optional navy Dim mode.
 - **Familiar wording:** Tweet, Retweet, Quote Tweet, and Messages in supported English interface labels.
 - **Native Home feed:** For you and Following stay available; the timeline `+` blends into the tab strip.
-- **Composer polish:** a muted “What's happening?” hint, flat blue toolbar icons, and a character ring that starts with the first character. X's native counter shows the exact count near the limit.
+- **Composer polish:** a muted “What's happening?” hint, flat blue toolbar icons, and a live remaining-character count that stays visible while typing and backspacing. The ring keeps its warning and over-limit states.
 - **Media and search fixes:** full-size photo carousels, visible recent-search avatars, and a single search focus outline.
 - **Consistent highlights:** one blue-tinted navigation highlight rather than overlapping hover layers.
-- **Modern Chat support:** light and Dim styling for X's newer isolated Chat interface, while preserving native conversations and controls.
+- **Messages:** a blue launcher and matching Light or Dim palettes on the full page and in the floating drawer, with native conversations and controls intact.
 - **Signed-out styling:** Twitter artwork and bird branding on X's existing landing page and login dialogs.
-- **Optional De-Elon mode:** hides supported Grok, Premium, subscription, and promotional surfaces.
-
-### What's new in 1.3.5
-
-Fixes overlapping text in X's refreshed composer and shows the character ring while typing. X's own counter takes over at the warning threshold. The native translation control uses a simple 文/A icon. Video controls retain their contrast over footage in Light and Dim mode.
-
-### 1.3.4
-
-Fixes the clipped Home heading, aligns the timeline controls, and adds a right gutter to the expanded navigation. The signed-in footer shows Twitter, Inc., and the current Messages panes follow Light or Dim. De-Elon folds Tweets that lead with a direct `@grok` mention into a compact, expandable row.
-
-### 1.3.3
-
-Restores the bird, Home icon, Tweet buttons, and blue composer tools on X's newer Home layout. De-Elon mode hides inactive extra timeline tabs, Calls, Creator Studio, Today’s News, and Grok controls, including the floating Grok panel. Chat appears as Messages, and saved posts remain available in History.
-
-### 1.3.2
-
-Fixed undersized carousel pictures, doubled navigation and search highlights, missing recent-search avatars, dark Chat panels, the missing composer hint, and the character counter's solid-blue track. Local validation covers 53 static checks and 47 browser-fixture checks, with additional mouse-hover checks available in the optional runner.
+- **Optional De-Elon mode:** hides supported Grok, Premium, subscription, and promotional surfaces. Direct `@grok` prompts disappear from the timeline without a visible placeholder.
+- **Ad filtering:** hides marked ads, including header badges and “Ad from…” disclosures, without leaving blank rows. It stays on even with De-Elon mode off.
+- **Translation and playback:** a neutral 文/A icon before and after translation, and video controls that stay readable over footage in either theme.
 
 ## Install
 
+> [!NOTE]
+> This is an unpacked extension for Chrome and Edge, not a browser-store listing. No build step, Node.js, or package installation is needed to use it.
+
 ### From a GitHub download
 
-1. Select **Code → Download ZIP** on this repository, then extract the ZIP.
+1. Open the [latest release](https://github.com/ExelecAKL/classic-twitter/releases/latest), download **Source code (zip)**, and extract it. **Code → Download ZIP** on the repository works too if you want the latest changes on `main`.
 2. Open your browser's extensions page:
    - Microsoft Edge: `edge://extensions`
    - Google Chrome: `chrome://extensions`
@@ -80,12 +84,39 @@ Fixed undersized carousel pictures, doubled navigation and search highlights, mi
 ### With Git
 
 ```sh
-git clone https://github.com/karaagexc/classic-twitter.git
+git clone https://github.com/ExelecAKL/classic-twitter.git
 ```
 
 Then use **Load unpacked** and choose the cloned `classic-twitter` folder.
 
-No build step, Node.js, or package installation is needed to use the extension. It runs on `https://x.com/*` and `https://twitter.com/*`; it does not change the domain displayed in the address bar.
+Classic Twitter runs on `https://x.com/*` and `https://twitter.com/*`. It doesn't change the domain displayed in the address bar.
+
+## Release history
+
+### What's new in 1.3.6
+
+This patch catches more X ad formats and fixes white gaps left by hidden timeline items. The floating Messages drawer now follows Light or Dim, the translation result drops its Grok glyph, and the composer count stays visible through the native warning-counter handoff. See the [release notes](https://github.com/ExelecAKL/classic-twitter/releases/tag/v1.3.6) for the full list.
+
+<details>
+<summary><strong>Earlier versions</strong></summary>
+
+### 1.3.5
+
+Fixed overlapping text in X's refreshed composer and showed the character ring while typing. X's own counter took over at the warning threshold. The native translation control gained a simple 文/A icon. Video controls retained their contrast over footage in Light and Dim.
+
+### 1.3.4
+
+Fixed the clipped Home heading, aligned the timeline controls, and added a right gutter to the expanded navigation. The signed-in footer became Twitter, Inc., Messages panes followed Light or Dim, and De-Elon could fold direct `@grok` prompts into a compact, expandable row.
+
+### 1.3.3
+
+Restored the bird, Home icon, Tweet buttons, and blue composer tools on X's newer Home layout. De-Elon mode hid inactive extra timeline tabs, Calls, Creator Studio, Today’s News, and Grok controls, including the floating Grok panel. Chat became Messages, and saved posts stayed in History.
+
+### 1.3.2
+
+Fixed undersized carousel pictures, doubled navigation and search highlights, missing recent-search avatars, dark Chat panels, the missing composer hint, and the character counter's solid-blue track. At the time, local validation covered 53 static checks and 47 browser-fixture checks, with additional mouse-hover checks in the optional runner.
+
+</details>
 
 ## Extension controls
 
@@ -95,9 +126,9 @@ Select the bird icon in your browser toolbar to open the popup.
 | --- | --- | --- |
 | **De-Elon mode** | Hides supported newer X navigation and promotional surfaces, including Grok and Premium prompts. | On |
 | **Classic dark mode** | Uses Twitter's navy Dim palette. Turn it off for the classic light theme. | Off |
-| **Get back to X** | Pauses visual and wording restoration and reloads X in its native appearance. Turn it off to restore Classic Twitter. | Off |
+| **Get back to X** | Pauses restoration and ad filtering, and reloads X in its native appearance. Turn it off to restore Classic Twitter. | Off |
 
-Preferences are saved locally in the browser. Appearance switches update the extension's theme; **Get back to X** reloads the page. Refresh another open tab if it has not picked up a change.
+Preferences are saved locally in the browser. Appearance switches update the extension's theme; **Get back to X** reloads the page. Refresh another open tab if it hasn't picked up a change. Ad filtering doesn't depend on the De-Elon switch.
 
 ## Update or remove
 
@@ -108,7 +139,8 @@ Preferences are saved locally in the browser. Appearance switches update the ext
 3. Find **Classic Twitter Light** and select **Reload**.
 4. Hard-refresh X with **Ctrl + Shift + R**.
 
-Refreshing X alone does not reload an extension's manifest or popup files.
+> [!TIP]
+> Refreshing X alone doesn't reload the extension's files. Use **Reload** on the extensions page first.
 
 ### Disable or uninstall
 
@@ -134,9 +166,10 @@ The extension reads the page's interface to apply styling and supported label re
 | The popup is missing a new switch | Reload the extension itself; refreshing the website is not enough. |
 | X branding is still visible | Make sure **Get back to X** is off. Report the affected page and a screenshot if it persists. |
 | Colors or media look wrong | Temporarily disable other X themes, userscripts, or extensions that modify the page. |
+| A labeled ad still appears | Reload to make sure you're on the latest release. If it persists, include a screenshot of the ad label and the page where it appeared in your report. |
 | A future X update breaks a panel | Check for an extension update. X regularly changes its markup and styles. |
 
-When reporting an issue, include the extension version, browser/version, page type, selected theme, and steps to reproduce. Crop or blur private information before attaching screenshots. Do not share passwords, cookies, account tokens, or private conversations.
+When [reporting an issue](https://github.com/ExelecAKL/classic-twitter/issues), include the extension version, browser/version, page type, selected theme, and steps to reproduce. Crop or blur private information before attaching screenshots. Do not share passwords, cookies, account tokens, or private conversations.
 
 ## Development and testing
 
@@ -171,7 +204,7 @@ node tests/serve-fixtures.mjs
 With the server running, open:
 
 - `http://127.0.0.1:4173/tests/v13-regression-fixture.html` — earlier Home and interface checks.
-- `http://127.0.0.1:4173/tests/current-regression-fixture.html` — carousels, avatars, focus states, composer hints, counter colors, and Chat shadow roots.
+- `http://127.0.0.1:4173/tests/current-regression-fixture.html` — carousels, avatars, focus states, composer hints and counters, Messages shadow roots, ad labels, and timeline gaps.
 - `http://127.0.0.1:4173/i/jf/onboarding/web` — signed-out and authentication styling fixture.
 
 The first two fixtures display their pass/fail results in the page. These checks are local; they do not post Tweets, sign in, or send messages to X.
@@ -195,7 +228,7 @@ The runner uses a detected Edge or Chrome installation on Windows, or Playwright
 
 ## Sharing the extension
 
-Share this repository or a source ZIP so users can follow the **Load unpacked** steps above. This repository is not an extension-store listing.
+Share this repository or the [latest release](https://github.com/ExelecAKL/classic-twitter/releases/latest) so users can download the source ZIP and follow the **Load unpacked** steps above. This repository is not an extension-store listing.
 
 If you package a signed extension, **keep the `.pem` private key private**. Other users do not need it to install or use the extension. The `.gitignore` excludes signing keys, packaged `.crx` files, archives, local credentials, and development dependencies from source commits. Publish packaged downloads separately only after checking the target browser's distribution requirements.
 
@@ -210,5 +243,7 @@ Bug reports and focused improvements are welcome. Before opening a change:
 5. Describe the affected page and include a privacy-safe screenshot when useful.
 
 ---
+
+**Keep the bird flying.**
 
 **Independent project.** Classic Twitter is not affiliated with, endorsed by, or an official product of X Corp. Twitter names, logos, and artwork belong to their respective rights holders. Compatibility can change when X updates its website.

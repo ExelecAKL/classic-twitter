@@ -96,6 +96,7 @@
           <button id="new-explain" data-slot="xds-button" aria-label="Explain this post"><svg data-icon="icon-logo-grok"></svg></button>
           <button id="new-translate" data-slot="xds-button" title="Translate with Grok"><svg data-icon="icon-logo-grok"></svg><span>Show translation</span></button>
           <button id="new-translation-settings" aria-label="Translation settings">⚙</button>
+          <div id="new-translated-status"><span><svg><path d="m9.27 15.28 7.98-5.92"/></svg></span><span>Translated from Spanish</span><button>Show original</button></div>
           <div id="new-video" class="bg-black tabular-nums" style="background-color:black">
             <video preload="none"></video>
             <div id="new-video-controls" class="group/controls" style="background-image:linear-gradient(transparent, #000b)">
@@ -110,16 +111,39 @@
           <button id="new-reply-submit">Reply</button>
         </article>
         <ul>
-          <li id="new-prompt-slot"><div id="new-prompt" role="link" data-href="/fixture/status/1" style="min-height:350px"><article><div class="whitespace-pre-wrap" dir="auto" lang="en"><a href="/grok">@grok</a> can you explain this?</div></article></div></li>
+          <li id="new-prompt-slot" data-index="1" style="min-height:350px"><div style="min-height:350px"><div id="new-prompt" role="link" data-href="/fixture/status/1"><article><div class="whitespace-pre-wrap" dir="auto" lang="en"><a href="/grok">@grok</a> can you explain this?</div></article></div></div></li>
           <li id="new-mention" role="link" data-testid="mentionGrokRow" aria-label="Conversation about Grok" data-href="/fixture/status/2"><article><div class="whitespace-pre-wrap" dir="auto" lang="en">I read a thread about <a href="/grok">@grok</a> today.</div></article></li>
           <li id="new-quote" role="link" data-href="/fixture/status/3"><article><div data-slot="embedded-tweet-frame"><div class="whitespace-pre-wrap" dir="auto" lang="en"><a href="/grok">@grok</a> please explain</div></div></article></li>
+          <li id="new-ad-slot" data-index="4"><div id="new-paid-post" role="link" data-href="/fixture/status/4" style="min-height:480px"><article><p>Paid campaign</p><a href="https://example.com" aria-label="Ad from example.com Learn more">Learn more</a></article></div></li>
+          <li><div id="new-organic-ai-post" role="link" data-href="/fixture/status/5"><article><div class="whitespace-pre-wrap" dir="auto" lang="en">Ordinary discussion of ads and AI.</div></article></div></li>
+          <li><div id="new-organic-quote-post" role="link" data-href="/fixture/status/6"><article><p>Discussing an ad</p><div data-slot="embedded-tweet-frame"><a href="https://example.com" aria-label="Ad from example.com Learn more">Quoted ad</a></div></article></div></li>
+          <li id="new-ad-disclosure-slot" data-index="7"><div id="new-ad-disclosure-post" role="link" data-href="/fixture/status/7" style="min-height:480px"><article><p>Paid campaign</p><a href="https://example.com/campaign" target="_blank" rel="noopener noreferrer">Ad from example.com</a></article></div></li>
+          <li><div id="new-organic-linked-text" role="link" data-href="/fixture/status/8"><article><div class="whitespace-pre-wrap" dir="auto" lang="en"><a href="https://example.com/campaign">Ad from example.com</a></div></article></div></li>
+          <li id="new-badge-ad-slot" data-index="9" style="min-height:520px"><div id="new-badge-ad" role="link" data-href="/fixture/status/9"><article>
+            <div class="@container/post-actions"><div><a href="/fixture">Work tutorial</a></div>
+              <div class="-me-[5px] flex shrink-0 items-center gap-1 whitespace-nowrap"><span id="new-ad-header-badge">Ad</span><button aria-label="More" data-slot="xds-menu-trigger">•••</button></div>
+            </div><div class="whitespace-pre-wrap" dir="auto" lang="en">Three models. Three different strengths.</div>
+            <span>There’s a new version of this post</span>
+          </article></div></li>
+          <li><div id="new-ad-negative-control" role="link" data-href="/fixture/status/10"><article>
+            <div class="@container/post-actions"><div><a href="/ad">Ad</a></div><div><button aria-label="More">•••</button></div></div>
+            <div class="whitespace-pre-wrap" dir="auto" lang="en">Sponsored</div>
+            <div data-slot="embedded-tweet-frame"><article><div><span>Ad</span><button aria-label="More">•••</button></div></article></div>
+          </article></div></li>
         </ul>
+        <div id="legacy-ad-post" data-testid="cellInnerDiv"><article data-testid="tweet">
+          <div><div aria-label="Promoted"></div><div><button data-testid="caret">•••</button></div></div>
+          <div data-testid="tweetText">No external disclosure link on this ad.</div>
+        </article></div>
+        <div id="legacy-tracked-ad" data-testid="placementTracking"><article data-testid="tweet"><div data-testid="tweetText">Tracked promotion</div></article></div>
       </main>
       <aside><section id="new-news"><header><h2>Today’s News</h2></header></section>
         <section id="new-trends"><h2>What’s happening</h2></section>
         <nav aria-label="Footer"><span>© 2026 X Corp.</span></nav></aside>
       <div id="new-grok-dock" data-slot="xds-dock-window"><button data-slot="xds-dock-launcher" aria-label="Expand Grok">Grok</button></div>
-      <div id="new-chat-dock" data-slot="xds-dock-window"><button data-slot="xds-dock-launcher" aria-label="Chat">Chat</button></div>
+      <div id="new-chat-dock" data-slot="xds-dock-window"><button data-slot="xds-dock-launcher" aria-label="Chat"><svg viewBox="0 0 24 24"></svg></button><div id="new-chat-drawer-host"></div></div>
+      <button id="legacy-chat-launcher" data-testid="chat-drawer-main" aria-label="Chat"><svg viewBox="0 0 24 24"></svg></button>
+      <div id="legacy-chat-drawer" data-testid="chat-drawer-main"><div id="legacy-chat-drawer-host" data-testid="xchatEmbedDrawer"></div></div>
       <div id="new-profile-hover" role="dialog" data-slot="xds-preview-card-popup">
         <img id="new-hover-cover" src="/assets/twitter-login-background.png" alt="Profile cover" width="200" height="52">
         <button id="new-hover-message" aria-label="Message">Message</button>
@@ -131,6 +155,16 @@
     document.body.append(fixture);
     const find = (selector) => fixture.querySelector(selector);
     const visible = (selector) => Boolean(find(selector)?.getClientRects().length);
+    const drawers = ["#new-chat-drawer-host", "#legacy-chat-drawer-host"].map((selector) => {
+      const shadow = find(selector).attachShadow({ mode: "open" });
+      shadow.innerHTML = `
+        <div data-xchat-root="drawer" style="background-color:black;color:white">
+          <h2 data-testid="dm-inbox-title">Chat</h2>
+          <div data-testid="dm-cold-inbox-suggestion-42"><p>You interact a lot on X</p></div>
+          <div data-testid="dm-chat-preview">You interact a lot on X</div>
+        </div>`;
+      return shadow;
+    });
     await waitFor(() => find("#new-submit")?.textContent === "Tweet" && find("#new-news")?.hasAttribute("data-twitter-classic-post-twitter"));
 
     await check("New Home restores the bird, Home glyph, heading and selected tab", () =>
@@ -174,35 +208,84 @@
       const mirror = style(find("#new-editor-mirror"));
       return transparent(editor.color) && blue(editor.caretColor) && ink(mirror.color) && editor.fontSize === mirror.fontSize;
     });
-    await check("The early counter starts on the first character and hands off to the native warning", async () => {
+    await check("Composer digits match native typography and stay visible when backspacing from warning", async () => {
       const editor = find("textarea");
       const slot = find("#new-counter-slot");
       const early = () => slot.querySelector("[data-twitter-classic-early-counter]");
+      const remaining = () => early()?.querySelector("[data-twitter-classic-early-count]");
       const type = (text) => {
         editor.value = text;
         editor.dispatchEvent(new InputEvent("input", { bubbles: true }));
       };
       if (early()) return false;
       type("a");
-      await waitFor(early);
+      await waitFor(() => remaining()?.textContent === "279");
       const earlyProgress = parseFloat(early().style.getPropertyValue("--twitter-counter-progress"));
-      if (!early().getClientRects().length || earlyProgress <= 0 || earlyProgress >= 1) return false;
+      const font = style(remaining());
+      if (!remaining().getClientRects().length || earlyProgress <= 0 || earlyProgress >= 1 ||
+          font.fontSize !== "13px" || font.fontWeight !== "400" || font.lineHeight !== "16px" || font.fontVariantNumeric !== "normal") return false;
+      type("a👩‍💻");
+      await waitFor(() => remaining()?.textContent === "277");
       type("a".repeat(266));
-      slot.insertAdjacentHTML("beforeend", '<div role="progressbar" aria-valuenow="266" aria-valuemax="280"><svg><circle r="9" stroke="currentColor"></circle><circle r="9" stroke="currentColor" stroke-dasharray="56.5" stroke-dashoffset="2.8"></circle></svg></div>');
+      slot.insertAdjacentHTML("beforeend", '<div class="text-warning">14</div><div role="progressbar" aria-valuenow="266" aria-valuemax="280"><svg><circle r="9" stroke="currentColor"></circle><circle r="9" stroke="currentColor" stroke-dasharray="56.5" stroke-dashoffset="2.8"></circle></svg></div>');
       const native = slot.querySelector('[role="progressbar"]');
       await waitFor(() => !early() && native.dataset.twitterClassicCounterState === "warning");
       const nativeArc = native.querySelector('[data-twitter-classic-counter-arc]');
       const preserved = nativeArc.getAttribute("stroke-dashoffset") === "2.8";
+      slot.querySelector(".text-warning").remove();
+      type("a".repeat(222));
+      native.setAttribute("aria-valuenow", "222");
+      await waitFor(() => remaining()?.textContent === "58");
+      const oneRing = style(early().querySelector("[data-twitter-classic-early-ring]")).display === "none";
+      type("a".repeat(224));
+      native.setAttribute("aria-valuenow", "224");
+      await waitFor(() => remaining()?.textContent === "56");
       native.remove();
       type("");
       await waitFor(() => !early());
-      return preserved;
+      return preserved && oneRing;
     });
     await check("Show translation keeps its native control and settings with a neutral icon", () => {
       const button = find("#new-translate");
       return visible("#new-translate") && visible("#new-translation-settings") && button.textContent === "Show translation" &&
         button.querySelectorAll('[data-twitter-classic-translation-icon]').length === 1 &&
         style(button.querySelector('[data-twitter-classic-translation-original]')).display === "none";
+    });
+    await check("Translated-from attribution swaps the inline Grok path and keeps the language and Show original", async () => {
+      const status = find("#new-translated-status");
+      const native = status.querySelector("svg[data-twitter-classic-translation-original]");
+      const neutral = status.querySelector("svg[data-twitter-classic-translation-icon]");
+      const correct = Boolean(native && neutral?.getClientRects().length) && style(native).display === "none" &&
+        status.children[1].textContent === "Translated from Spanish" && visible("#new-translated-status button");
+      const rerender = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "m9.27 15.28 7.98-5.92");
+      rerender.append(path);
+      if (!native) return false;
+      native.replaceWith(rerender);
+      await waitFor(() => rerender.hasAttribute("data-twitter-classic-translation-original"));
+      return correct && status.querySelectorAll("svg[data-twitter-classic-translation-icon]").length === 1;
+    });
+    await check("Modern and legacy square Messages launchers use Twitter blue and a white outline", () =>
+      ["#new-chat-dock button", "#legacy-chat-launcher"].every((selector) => {
+        const launcher = find(selector);
+        return launcher.getAttribute("aria-label") === "Messages" && blue(style(launcher).backgroundColor) &&
+          style(launcher).borderTopColor === "rgb(255, 255, 255)" &&
+          style(launcher.querySelector("svg")).color === "rgb(255, 255, 255)";
+      }));
+    await check("Both Messages drawers follow Light and Dim and rebrand only the suggestion subtitle", async () => {
+      await waitFor(() => drawers.every((shadow) => shadow.querySelector("link")?.sheet));
+      const panels = drawers.map((shadow) => shadow.querySelector("[data-xchat-root]"));
+      const readable = panels.every((panel) => light(style(panel).backgroundColor) && ink(style(panel).color) &&
+        panel.querySelector("h2").textContent === "Messages" &&
+        panel.querySelector('[data-testid^="dm-cold-inbox-suggestion-"]').textContent === "You interact a lot on Twitter" &&
+        panel.querySelector('[data-testid="dm-chat-preview"]').textContent === "You interact a lot on X");
+      await window.fixtureSetOptions({ classicDark: true });
+      await waitFor(() => panels.every((panel) => dim(style(panel).backgroundColor)));
+      const dimReadable = panels.every((panel) => light(style(panel).color));
+      await window.fixtureSetOptions({ classicDark: false });
+      await waitFor(() => panels.every((panel) => light(style(panel).backgroundColor)));
+      return readable && dimReadable;
     });
     await check("Playback chrome keeps white controls and dark overlays in Light and Dim", async () => {
       const readable = () => style(find("#new-video")).backgroundColor === "rgb(0, 0, 0)" &&
@@ -245,14 +328,75 @@
       extra.setAttribute("aria-selected", "false");
       return hasCoreTabs && hiddenByDefault && visibleWhileActive;
     });
-    await check("A direct Grok prompt folds into one short row while mentions and quotes stay visible", () => {
-      const button = find("#new-prompt-slot [data-twitter-classic-grok-toggle]");
-      const collapsed = !visible("#new-prompt") && find("#new-prompt-slot").getBoundingClientRect().height < 70;
-      button.click();
-      const expanded = visible("#new-prompt") && button.getAttribute("aria-expanded") === "true";
-      button.click();
-      return collapsed && expanded && !visible("#new-prompt") && visible("#new-mention") && visible("#new-quote") &&
+    await check("A direct Grok prompt leaves no visible row while mentions and quotes stay visible", () => {
+      const slot = find("#new-prompt-slot");
+      return !visible("#new-prompt") && slot.getBoundingClientRect().height === 1 &&
+        style(slot).visibility === "hidden" && !slot.querySelector("button") && visible("#new-mention") && visible("#new-quote") &&
         find("#new-mention a").textContent === "@grok";
+    });
+    await check("The virtualizer remeasures already hidden rows and clears the shim on recycled posts", async () => {
+      const timeline = document.createElement("ul");
+      timeline.style.position = "relative";
+      timeline.innerHTML = `
+        <li id="virtual-hidden" data-index="22" hidden style="display:none;position:absolute;transform:translateY(0px);min-height:500px;"><article>Hidden timeline item</article></li>
+        <li id="virtual-follower" data-index="23" style="position:absolute;transform:translateY(500px)"><article>Next visible Tweet</article></li>`;
+      find("main").append(timeline);
+      const hidden = find("#virtual-hidden");
+      const follower = find("#virtual-follower");
+      const offset = () => follower.getBoundingClientRect().top - hidden.getBoundingClientRect().top;
+      const observer = new ResizeObserver(() => {
+        const height = hidden.getBoundingClientRect().height;
+        // X's virtualizer may ignore a zero-sized hidden row and retain its estimate.
+        if (height > 0 && follower.style.transform !== `translateY(${height}px)`) {
+          follower.style.transform = `translateY(${height}px)`;
+        }
+      });
+      observer.observe(hidden);
+      try {
+        await waitFor(() => offset() === 1 && style(hidden).visibility === "hidden");
+        hidden.removeAttribute("hidden");
+        hidden.style.removeProperty("display");
+        hidden.style.minHeight = "100px";
+        hidden.dataset.index = "25";
+        await waitFor(() => offset() === 100 && style(hidden).visibility === "visible");
+        return !hidden.hasAttribute("data-twitter-classic-hidden-feed-slot");
+      } finally {
+        observer.disconnect();
+        timeline.remove();
+      }
+    });
+    await check("Ad filtering preserves organic posts, quotes, and recycled feed rows", async () => {
+      const slot = find("#new-ad-slot");
+      const collapsed = !visible("#new-paid-post") && slot.getBoundingClientRect().height === 1;
+      const unaffected = visible("#new-organic-ai-post") && visible("#new-organic-quote-post");
+      const disclosure = find("#new-paid-post a");
+      disclosure.setAttribute("aria-label", "Visit website");
+      await waitFor(() => visible("#new-paid-post"));
+      disclosure.setAttribute("aria-label", "Ad from example.com Learn more");
+      await waitFor(() => !visible("#new-paid-post"));
+      return collapsed && unaffected;
+    });
+    await check("Plain-text Ad from disclosures collapse only their paid row, including text updates", async () => {
+      const slot = find("#new-ad-disclosure-slot");
+      const hidden = !visible("#new-ad-disclosure-post") && slot.getBoundingClientRect().height === 1;
+      const disclosure = find("#new-ad-disclosure-post a");
+      disclosure.firstChild.nodeValue = "Visit website";
+      await waitFor(() => visible("#new-ad-disclosure-post"));
+      disclosure.firstChild.nodeValue = "Ad from example.com";
+      await waitFor(() => !visible("#new-ad-disclosure-post"));
+      return hidden && visible("#new-organic-linked-text");
+    });
+    await check("Header badges and placement metadata hide ads without hiding a name, tweet body, or quote", async () => {
+      const slot = find("#new-badge-ad-slot");
+      const filtered = !visible("#new-badge-ad") && slot.getBoundingClientRect().height === 1 &&
+        !visible("#legacy-ad-post") && !visible("#legacy-tracked-ad article");
+      const badge = find("#new-ad-header-badge");
+      badge.remove();
+      await waitFor(() => visible("#new-badge-ad"));
+      badge.textContent = "Sponsored";
+      find("#new-badge-ad button").before(badge);
+      await waitFor(() => !visible("#new-badge-ad"));
+      return filtered && visible("#new-ad-negative-control");
     });
 
     await window.fixtureSetOptions({ deElon: false });
@@ -260,8 +404,20 @@
     await check("Turning off De-Elon brings back the native extra tabs, toolbar and dock", () =>
       ['[role="tab"]:not([data-pinned-timeline])', "#new-news", "#new-grok-dock", "#new-explain", '[aria-label="Generate image"]'].every(visible));
     await check("Turning off De-Elon displays native Grok prompt rows", () =>
-      visible("#new-prompt") && !visible("#new-prompt-slot [data-twitter-classic-grok-toggle]"));
+      visible("#new-prompt") && style(find("#new-prompt-slot")).visibility === "visible");
     await check("Turning off De-Elon restores the Grok Profile Summary action", () => visible("#new-hover-summary"));
+    await check("Ad filtering and gap prevention stay active with De-Elon off", () =>
+      ["#new-paid-post", "#new-ad-disclosure-post", "#new-badge-ad", "#legacy-ad-post", "#legacy-tracked-ad article"].every((selector) => !visible(selector)) &&
+      find("#new-badge-ad-slot").getBoundingClientRect().height === 1);
+    await check("Pausing Classic Twitter restores native ad visibility", () => {
+      const root = document.documentElement;
+      root.setAttribute("data-twitter-classic", "off");
+      try {
+        return visible("#new-badge-ad") && visible("#new-ad-disclosure-post");
+      } finally {
+        root.setAttribute("data-twitter-classic", "on");
+      }
+    });
     fixture.remove();
     await window.fixtureSetOptions({ deElon: true });
     await waitFor(() => document.documentElement.dataset.twitterClassicDeElon === "on");

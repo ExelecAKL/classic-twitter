@@ -22,6 +22,9 @@
 
   const POST_TEXT_SELECTOR = '[data-testid="tweetText"], article div[dir][lang][class*="whitespace-pre-wrap"]';
   const POST_ROW_SELECTOR = '[role="link"][data-href*="/status/"]';
+  const QUOTED_POST_SELECTOR = '[data-slot="embedded-tweet-frame"], [data-testid="quoteTweet"]';
+  const VIRTUAL_FEED_SLOT_SELECTOR = ':is(main, [role="main"]) :is(ul > li[data-index], [data-testid="cellInnerDiv"][style*="translateY("])';
+  const MEASURED_HIDDEN_SLOT = "data-twitter-classic-hidden-feed-slot";
   const PROTECTED_CONTENT_SELECTOR = [
     POST_TEXT_SELECTOR,
     '[data-testid="User-Name"]',
@@ -63,12 +66,17 @@
   const PRIMARY_NAV = 'nav[aria-label="Primary"]';
   const MODERN_COMPOSER_TOOLBAR = '[data-truncated-list]:has([aria-label="Add media"], [data-icon="icon-photo"], use[href="#icon-photo"])';
   const MODERN_RETWEET = 'article button[data-slot="xds-menu-trigger"][aria-label*="repost" i]';
+  const GROK_TRANSLATION_ICON = 'svg:is([data-icon*="grok" i], :has(use[href*="grok" i], path[d^="m9.27 15.28 7.98-5.92"]))';
+  const AD_DISCLOSURE_TEXT = /^Ad from (?:[a-z\d-]+\.)+[a-z\d-]+$/i;
+  const AD_BADGE_TEXT = /^(?:Ad|Promoted|Sponsored)$/i;
+  const POST_MENU_SELECTOR = '[data-testid="caret"], :is(button, [role="button"])[aria-label="More" i]';
+  const EXCLUDED_AD_LABEL_SELECTOR = `${QUOTED_POST_SELECTOR}, ${POST_TEXT_SELECTOR}, [data-testid="User-Name"], [data-testid="UserDescription"]`;
 
   const OBSERVED_ATTRIBUTES = [
     "aria-label", "aria-description", "aria-current", "aria-selected",
     "aria-describedby", "aria-valuenow", "aria-valuemax", "aria-valuemin",
     "title", "placeholder", "data-placeholder", "href", "data-href", "data-theme",
-    "class", "style", "stroke", "stroke-dasharray", "stroke-dashoffset"
+    "class", "style", "hidden", "data-index", "data-testid", "stroke", "stroke-dasharray", "stroke-dashoffset"
   ];
 
   const LABEL_TARGET_SELECTOR = [
@@ -91,6 +99,7 @@
     '[data-twitter-classic-modern-toolbar] button',
     `${PRIMARY_NAV} > a`,
     '[data-slot="xds-dock-launcher"][aria-label="Chat"]',
+    '[data-testid="chat-drawer-main"]:is(button, [role="button"])',
     MODERN_RETWEET,
     'header[role="banner"] nav a',
     "input[placeholder]",
@@ -855,20 +864,40 @@
     const slot = submit.parentElement?.firstElementChild;
     if (!slot?.matches('div.flex.items-center.gap-1')) return;
 
-    let ring = slot.querySelector(':scope > [data-twitter-classic-early-counter]');
-    if (!editor.value || slot.querySelector(COUNTER_SELECTOR)) {
-      ring?.remove();
+    let counter = slot.querySelector(':scope > [data-twitter-classic-early-counter]');
+    const nativeRing = slot.querySelector(COUNTER_SELECTOR);
+    // X can leave the progress bar mounted after removing its number.
+    const nativeNumber = [...slot.children].some((element) => element !== counter && /^[-−]?\d+$/.test(element.textContent.trim()));
+    if (!editor.value || nativeNumber) {
+      counter?.remove();
       return;
     }
-    if (!ring) {
-      ring = document.createElement("span");
-      ring.setAttribute("data-twitter-classic-early-counter", "on");
+    if (!counter) {
+      counter = document.createElement("span");
+      counter.setAttribute("data-twitter-classic-early-counter", "on");
+      counter.setAttribute("role", "img");
+      counter.title = "Characters remaining";
+      const number = document.createElement("span");
+      number.setAttribute("data-twitter-classic-early-count", "on");
+      const ring = document.createElement("span");
+      ring.setAttribute("data-twitter-classic-early-ring", "on");
       ring.setAttribute("aria-hidden", "true");
-      slot.append(ring);
+      counter.append(number, ring);
+      slot.prepend(counter);
     }
-    const progress = `${Math.min(100, estimateDraftLength(editor.value) / 280 * 100)}%`;
-    if (ring.style.getPropertyValue("--twitter-counter-progress") !== progress) {
-      ring.style.setProperty("--twitter-counter-progress", progress);
+    const reportedLength = Number.parseInt(nativeRing?.getAttribute("aria-valuenow"), 10);
+    const hasNativeLength = Number.isFinite(reportedLength);
+    const limit = Number(nativeRing?.getAttribute("aria-valuemax")) || 280;
+    const length = Math.min(limit, hasNativeLength ? reportedLength : estimateDraftLength(editor.value));
+    const remaining = String(limit - length);
+    const [number, ring] = counter.children;
+    ring.hidden = Boolean(nativeRing);
+    if (number.textContent !== remaining) number.textContent = remaining;
+    const label = `${remaining} ${hasNativeLength ? "" : "estimated "}characters remaining`;
+    if (counter.getAttribute("aria-label") !== label) counter.setAttribute("aria-label", label);
+    const progress = `${length / limit * 100}%`;
+    if (counter.style.getPropertyValue("--twitter-counter-progress") !== progress) {
+      counter.style.setProperty("--twitter-counter-progress", progress);
     }
   }
 
@@ -1037,24 +1066,13 @@
     }
   }
 
-  function restoreTranslationIcons(root) {
-    const controls = new Set();
-    addMatches(root, 'button, a[role="button"], [role="button"], [data-testid="translateTweet"]', controls);
-    for (const control of controls) {
-      const translationLabel = /^(?:Show translation|Hide translation|Translate (?:post|Tweet))$/i;
-      if (![control.getAttribute("aria-label"), control.textContent].some((label) => translationLabel.test(label?.trim() || ""))) continue;
-      control.setAttribute("data-twitter-classic-translation-control", "on");
-      control.removeAttribute("data-twitter-classic-post-twitter");
-
-      const original = control.querySelector('svg[data-icon*="grok" i], svg:has(use[href*="grok" i])');
-      if (!original) continue;
-      original.setAttribute("data-twitter-classic-translation-original", "on");
-      const existingIcon = control.querySelector('svg[data-twitter-classic-translation-icon]');
-      if (existingIcon) {
-        if (existingIcon !== original.previousElementSibling) original.before(existingIcon);
-        continue;
-      }
-
+  function replaceTranslationGlyph(original) {
+    if (!original) return;
+    const parent = original.parentElement;
+    const existingIcon = parent.querySelector(':scope > svg[data-twitter-classic-translation-icon]');
+    if (existingIcon) {
+      if (existingIcon !== original.previousElementSibling) original.before(existingIcon);
+    } else {
       const svgNamespace = "http://www.w3.org/2000/svg";
       const icon = document.createElementNS(svgNamespace, "svg");
       icon.setAttribute("viewBox", "0 0 24 24");
@@ -1064,6 +1082,40 @@
       glyph.setAttribute("d", "M7.5 3v2M2.5 6h10M4.5 6c1 4 3.5 7 7 9M10.5 6c-1 4-3.5 7-7 9M13 21l4.5-11L22 21M14.4 17.5h6.2");
       icon.append(glyph);
       original.before(icon);
+    }
+    original.setAttribute("data-twitter-classic-translation-original", "on");
+  }
+
+  function restoreTranslationIcons(root) {
+    const controls = new Set();
+    addMatches(root, 'button, a[role="button"], [role="button"], [data-testid="translateTweet"]', controls);
+    const translationLabel = /^(?:Show translation|Hide translation|Translate (?:post|Tweet))$/i;
+    for (const control of controls) {
+      if (![control.getAttribute("aria-label"), control.textContent].some((label) => translationLabel.test(label?.trim() || ""))) continue;
+      control.setAttribute("data-twitter-classic-translation-control", "on");
+      control.removeAttribute("data-twitter-classic-post-twitter");
+      replaceTranslationGlyph(control.querySelector(GROK_TRANSLATION_ICON));
+    }
+
+    // After translating, X renders the glyph in its own span beside the
+    // source-language label, rather than inside the translation button.
+    const badges = new Set();
+    addMatches(root, `article ${GROK_TRANSLATION_ICON}`, badges);
+    const labels = new Set();
+    addMatches(root, "article span:nth-child(2)", labels);
+    for (const label of labels) {
+      const glyph = label.previousElementSibling;
+      if (glyph?.matches("span")) {
+        const icon = glyph.querySelector(GROK_TRANSLATION_ICON);
+        if (icon) badges.add(icon);
+      }
+    }
+    for (const icon of badges) {
+      const badge = icon.closest("span");
+      if (!badge?.matches(":first-child") || badge.closest(PROTECTED_CONTENT_SELECTOR)) continue;
+      const label = badge.nextElementSibling;
+      if (!label?.matches("span") || !/^Translated from \S/i.test(label.textContent.trim())) continue;
+      replaceTranslationGlyph(icon);
     }
   }
 
@@ -1281,10 +1333,52 @@
     }
   }
 
-  function clearGrokPrompt(row, entry) {
+  function clearGrokPrompt(row) {
     row.removeAttribute("data-twitter-classic-grok-prompt");
-    entry.toggle.remove();
     grokPrompts.delete(row);
+  }
+
+  function hasPaidPostBadge(article) {
+    for (const menu of article.querySelectorAll(POST_MENU_SELECTOR)) {
+      if (menu.closest(EXCLUDED_AD_LABEL_SELECTOR) || menu.closest("article") !== article) continue;
+      // The visible badge is next to the menu, not part of the author's
+      // name or the tweet text. Legacy layouts may wrap the menu once.
+      for (let branch = menu, depth = 0; depth < 2; depth += 1, branch = branch.parentElement) {
+        const group = branch.parentElement;
+        if (!group || group === article) break;
+        for (const badge of group.children) {
+          if (badge === branch || !badge.matches("span, div, [aria-label]")) continue;
+          if (badge.closest(EXCLUDED_AD_LABEL_SELECTOR) ||
+              badge.querySelector(`a, button, [role="link"], [role="button"], ${EXCLUDED_AD_LABEL_SELECTOR}`)) continue;
+          if (AD_BADGE_TEXT.test((badge.getAttribute("aria-label") || badge.textContent).trim())) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function markFeedAds(root) {
+    if (root.getRootNode() instanceof ShadowRoot) return;
+    const posts = new Set();
+    addMatches(root, `:is(main, [role="main"]) :is(article, ${POST_ROW_SELECTOR}, [data-testid="cellInnerDiv"])`, posts);
+    const rows = new Set();
+    for (const post of posts) {
+      if (post.closest(QUOTED_POST_SELECTOR)) continue;
+      rows.add(post.closest(POST_ROW_SELECTOR) || post.closest('[data-testid="cellInnerDiv"]') || post);
+    }
+    for (const row of rows) {
+      const article = row.matches("article") ? row : row.querySelector("article");
+      const paid = article && !article.closest(QUOTED_POST_SELECTOR) && (
+        article.closest('[data-testid="placementTracking"]') || hasPaidPostBadge(article) ||
+        [...row.querySelectorAll('a[href], [aria-label^="Ad from " i], [data-testid="promotedIndicator"], [data-testid="placementTracking"]')]
+          .some((label) => {
+            if (label.closest(EXCLUDED_AD_LABEL_SELECTOR)) return false;
+            if (label.matches('[data-testid="promotedIndicator"], [data-testid="placementTracking"], [aria-label^="Ad from " i]')) return true;
+            return label.matches('a[href^="http://" i], a[href^="https://" i]') &&
+              AD_DISCLOSURE_TEXT.test(label.textContent.trim());
+          }));
+      row.toggleAttribute("data-twitter-classic-feed-ad", Boolean(paid));
+    }
   }
 
   function markGrokPrompts(root) {
@@ -1293,38 +1387,49 @@
     addMatches(root, POST_TEXT_SELECTOR, bodies);
     for (const body of bodies) {
       const article = body.closest("article");
-      if (!article?.closest('main, [role="main"]') || body.closest('[data-slot="embedded-tweet-frame"], [data-testid="quoteTweet"]')) continue;
+      if (!article?.closest('main, [role="main"]') || body.closest(QUOTED_POST_SELECTOR)) continue;
 
-      // Keep the disclosure in the same native list item so virtualized feeds
-      // measure the collapsed height and don't leave an empty slot behind.
-      const row = article.parentElement.matches(POST_ROW_SELECTOR) ? article.parentElement : article;
+      const row = article.closest(POST_ROW_SELECTOR) || article;
       const existing = grokPrompts.get(row);
       const path = row.getAttribute("data-href") || article.querySelector('a[href*="/status/"]:has(time)')?.getAttribute("href");
       const isOpenTweet = pageKind() === "status" && (!path || path.split("?")[0] === location.pathname);
       const directPrompt = /^(?:(?:hey|hi|yo)\s+)?@grok(?=$|[\s,.:!?])/i.test(body.textContent.trim());
-      if (isOpenTweet || !directPrompt) {
-        if (existing?.body === body) clearGrokPrompt(row, existing);
+      if (isOpenTweet || !directPrompt || row.closest('[data-twitter-classic-feed-ad]')) {
+        if (existing === body) clearGrokPrompt(row);
         continue;
       }
-      if (existing?.body === body && existing.path === path && existing.toggle.parentElement === row.parentElement) continue;
-      if (existing) clearGrokPrompt(row, existing);
-
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.setAttribute("data-twitter-classic-grok-toggle", "on");
-      toggle.setAttribute("aria-expanded", "false");
-      toggle.textContent = "Show hidden Grok prompt";
-      toggle.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const expanded = toggle.getAttribute("aria-expanded") === "true";
-        toggle.setAttribute("aria-expanded", String(!expanded));
-        row.setAttribute("data-twitter-classic-grok-prompt", expanded ? "collapsed" : "expanded");
-        toggle.textContent = expanded ? "Show hidden Grok prompt" : "Hide Grok prompt";
-      });
-      row.before(toggle);
       row.setAttribute("data-twitter-classic-grok-prompt", "collapsed");
-      grokPrompts.set(row, { body, path, toggle });
+      grokPrompts.set(row, body);
     }
+  }
+
+  function containsOnlyHiddenPost(slot) {
+    for (let element = slot; element; ) {
+      if (element.hasAttribute("data-twitter-classic-feed-ad") ||
+          (options.deElon && element.matches('[data-twitter-classic-grok-prompt="collapsed"]'))) return true;
+      const child = element.firstElementChild;
+      if (!child || child.nextElementSibling) return false;
+      element = child;
+    }
+    return false;
+  }
+
+  function reconcileVirtualFeedSlots() {
+    const checkNativeVisibility = [];
+    for (const slot of document.querySelectorAll(`${VIRTUAL_FEED_SLOT_SELECTOR}, [${MEASURED_HIDDEN_SLOT}]`)) {
+      if (!slot.matches(VIRTUAL_FEED_SLOT_SELECTOR)) {
+        slot.removeAttribute(MEASURED_HIDDEN_SLOT);
+      } else if (containsOnlyHiddenPost(slot)) {
+        slot.toggleAttribute(MEASURED_HIDDEN_SLOT, true);
+      } else {
+        // Sample the native display without our shim so a recycled row (or a
+        // row no longer hidden by another stylesheet) can become visible.
+        slot.removeAttribute(MEASURED_HIDDEN_SLOT);
+        if (options.deElon && slot.style.position === "absolute") checkNativeVisibility.push(slot);
+      }
+    }
+    const hidden = checkNativeVisibility.filter((slot) => getComputedStyle(slot).display === "none");
+    for (const slot of hidden) slot.setAttribute(MEASURED_HIDDEN_SLOT, "");
   }
 
   function parseColor(value) {
@@ -1450,11 +1555,11 @@
 
   function restoreChatShadowRoots() {
     const hosts = new Set(document.querySelectorAll(
-      '[data-testid="xchatEmbedRoute"], [data-testid="xchatEmbedOverlays"]'
+      '[data-testid="xchatEmbedRoute"], [data-testid="xchatEmbedOverlays"], [data-testid="xchatEmbedDrawer"]'
     ));
     // Recent X builds dropped the host test IDs. The mounted Chat document
     // carries its own marker inside the open shadow root.
-    for (const candidate of document.querySelectorAll('body > div, main [class*="--dm-bottom-inset"], [data-slot="xds-dock-window"] [class*="--dm-bottom-inset"]')) {
+    for (const candidate of document.querySelectorAll('body > div, main [class*="--dm-bottom-inset"], [data-slot="xds-dock-window"], [data-slot="xds-dock-window"] div')) {
       if (candidate.shadowRoot?.querySelector('[data-xchat-root]')) hosts.add(candidate);
     }
     let waitingForShadow = false;
@@ -1746,6 +1851,18 @@
     }
   }
 
+  function restoreChatSuggestionCopy(root) {
+    const suggestions = new Set();
+    addMatches(root, '[data-testid^="dm-cold-inbox-suggestion-"]', suggestions);
+    for (const suggestion of suggestions) {
+      const walker = document.createTreeWalker(suggestion, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const next = node.nodeValue.replace(/^(\s*)You interact a lot on X(\s*)$/, "$1You interact a lot on Twitter$2");
+        if (next !== node.nodeValue) node.nodeValue = next;
+      }
+    }
+  }
+
   function processRoot(root) {
     const normalized = root instanceof Text ? root.parentElement : root;
     if (!(normalized instanceof Element || normalized instanceof Document || normalized instanceof DocumentFragment)) {
@@ -1760,11 +1877,13 @@
     markModernComposers(normalized);
     restoreModernHomeLabels(normalized);
     restoreTranslationIcons(normalized);
+    restoreChatSuggestionCopy(normalized);
     restoreFooterBranding(normalized);
     markCharacterCounters(normalized);
     markBackButtons(normalized);
     markSearchPills(normalized);
     markDeElonControls(normalized);
+    markFeedAds(normalized);
     markGrokPrompts(normalized);
     normalizeVisualLeaks(normalized);
   }
@@ -1781,8 +1900,8 @@
     restoreHomeChrome();
     reconcileSignedOutLanding();
     restoreChatShadowRoots();
-    for (const [row, entry] of grokPrompts) {
-      if (!row.isConnected || !row.contains(entry.body)) clearGrokPrompt(row, entry);
+    for (const [row, body] of grokPrompts) {
+      if (!row.isConnected || !row.contains(body)) clearGrokPrompt(row);
     }
 
     const roots = [...pendingRoots];
@@ -1796,6 +1915,7 @@
       }
       processRoot(root);
     }
+    reconcileVirtualFeedSlots();
     markShellReady();
   }
 

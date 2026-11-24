@@ -79,6 +79,7 @@
 :host([data-twitter-classic-chat-host="on"]) :is(
   .bg-background,
   [data-xchat-root="route"],
+  [data-xchat-root="drawer"],
   [data-testid="dm-container"],
   [data-testid="dm-inbox-panel"],
   [data-testid="dm-conversation-panel"],

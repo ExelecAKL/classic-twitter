@@ -666,49 +666,72 @@ html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
   display: none !important;
 }
 
+html[data-twitter-classic="on"] [data-twitter-classic-feed-ad],
+html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
+  [data-twitter-classic-grok-prompt="collapsed"] {
+  display: none !important;
+}
+
+/* display:none makes the virtualizer keep its last height. Give the hidden
+   slot a measurable pixel so following tweets move up with no visible gap. */
+html[data-twitter-classic="on"]
+  [data-twitter-classic-hidden-feed-slot]:is(li[data-index], [data-testid="cellInnerDiv"]) {
+  display: block !important;
+  box-sizing: border-box !important;
+  block-size: 1px !important;
+  min-block-size: 1px !important;
+  max-block-size: 1px !important;
+  padding-block: 0 !important;
+  margin-block: 0 !important;
+  border-block-width: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  content-visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"] :is(
   main div:has(> [data-slot="xds-callout"][data-twitter-classic-post-twitter="on"]:only-child),
-  [data-slot="xds-dock-window"]:has([data-slot="xds-dock-launcher"] :is([data-icon="icon-logo-grok"], use[href="#icon-logo-grok"])),
+  [data-slot="xds-dock-window"]:has([data-slot="xds-dock-launcher"]:is([aria-label="Expand Grok"], :has([data-icon="icon-logo-grok"], use[href="#icon-logo-grok"]))),
   [data-twitter-classic-modern-toolbar] > [data-truncated-item]:has(:is([aria-label="Generate image"], [data-icon="icon-logo-grok"], use[href="#icon-logo-grok"])),
   article button[data-slot="xds-button"]:not([data-twitter-classic-translation-control]):is([aria-label="Explain this post"], :has([data-icon="icon-logo-grok"], use[href="#icon-logo-grok"]))
 ) {
   display: none !important;
 }
 
-[data-twitter-classic-grok-toggle] {
-  display: none !important;
-}
-
-html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
-  [data-twitter-classic-grok-prompt="collapsed"] {
-  display: none !important;
-}
-
-html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
-  [data-twitter-classic-grok-toggle] {
-  display: block !important;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 16px;
-  border: 0;
-  border-block-end: 1px solid var(--twitter-border);
-  background: var(--twitter-soft);
-  color: var(--twitter-ink) !important;
-  text-align: start;
-  cursor: pointer;
-}
-
-html[data-twitter-classic="on"][data-twitter-classic-de-elon="on"]
-  [data-twitter-classic-grok-toggle]:is(:hover, :focus-visible) {
-  background: var(--twitter-soft-hover);
-}
-
-html[data-twitter-classic="on"] [data-twitter-classic-grok-toggle]:focus-visible {
-  outline: 2px solid var(--twitter-blue);
-  outline-offset: -3px;
-}
-
 /* Messages: classic light or 2021 dark-blue Dim, never pitch black. */
+
+html[data-twitter-classic="on"] :is(
+  [data-slot="xds-dock-launcher"]:is([aria-label="Chat"], [aria-label="Messages"]),
+  [data-testid="chat-drawer-main"]:is(button, [role="button"])
+) {
+  background-color: var(--twitter-blue) !important;
+  background-image: none !important;
+  border-color: #fff !important;
+  color: #fff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-slot="xds-dock-launcher"]:is([aria-label="Chat"], [aria-label="Messages"]),
+  [data-testid="chat-drawer-main"]:is(button, [role="button"])
+):is(:hover, :focus-visible) {
+  background-color: var(--twitter-blue-hover) !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-slot="xds-dock-launcher"]:is([aria-label="Chat"], [aria-label="Messages"]),
+  [data-testid="chat-drawer-main"]:is(button, [role="button"])
+) svg {
+  color: #fff !important;
+}
+
+html[data-twitter-classic="on"] :is(
+  [data-testid="chat-drawer-main"]:has([data-testid="xchatEmbedDrawer"]),
+  [data-slot="xds-dock-window"]:has([data-twitter-classic-chat-host="on"])
+) {
+  background-color: var(--twitter-surface) !important;
+  border-color: var(--twitter-border) !important;
+}
 
 html[data-twitter-classic="on"][data-twitter-classic-page="messages"] :is(
   main[role="main"],
@@ -1568,13 +1591,33 @@ html[data-twitter-classic="on"]
 }
 
 html[data-twitter-classic="on"] [data-twitter-classic-early-counter] {
-  display: inline-block;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  color: var(--twitter-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  font-variant-numeric: normal;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-early-count] {
+  min-inline-size: 3ch;
+  text-align: end;
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-early-ring] {
   flex: 0 0 20px;
   width: 20px;
   height: 20px;
   border-radius: 50%;
   background: conic-gradient(var(--twitter-blue) var(--twitter-counter-progress), var(--twitter-border) 0);
   mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+}
+
+html[data-twitter-classic="on"] [data-twitter-classic-early-ring][hidden] {
+  display: none !important;
 }
 
 /* The newer XDS layout no longer uses React Native's Home and composer IDs. */
